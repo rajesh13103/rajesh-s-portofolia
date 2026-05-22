@@ -135,7 +135,7 @@ setTimeout(typeTag, 400);
 function animateCounter(el) {
   const target = parseFloat(el.dataset.count);
   const isFloat = String(target).includes('.');
-  const dur = 1500, step = 16;
+  const dur = 1500;
   let cur = 0, start = null;
   function tick(ts) {
     if (!start) start = ts;
@@ -155,12 +155,8 @@ const aosObs = new IntersectionObserver(entries => {
     if (e.isIntersecting) {
       e.target.classList.add('visible');
       e.target.querySelectorAll('[data-count]').forEach(animateCounter);
-      e.target.querySelectorAll('.score-fill[data-width],.skill-fill[data-width]').forEach(b => {
-        b.style.width = b.dataset.width;
-      });
-      e.target.querySelectorAll('.info-row').forEach((row, i) => {
-        setTimeout(() => row.classList.add('visible'), i * 80);
-      });
+      e.target.querySelectorAll('.score-fill[data-width],.skill-fill[data-width]').forEach(b => { b.style.width = b.dataset.width; });
+      e.target.querySelectorAll('.info-row').forEach((row, i) => { setTimeout(() => row.classList.add('visible'), i * 80); });
     }
   });
 }, { threshold: 0.12 });
@@ -169,13 +165,9 @@ aosEls.forEach(el => aosObs.observe(el));
 const barObs = new IntersectionObserver(entries => {
   entries.forEach(e => {
     if (e.isIntersecting) {
-      e.target.querySelectorAll('.score-fill[data-width],.skill-fill[data-width]').forEach(b => {
-        b.style.width = b.dataset.width;
-      });
+      e.target.querySelectorAll('.score-fill[data-width],.skill-fill[data-width]').forEach(b => { b.style.width = b.dataset.width; });
       e.target.querySelectorAll('[data-count]').forEach(animateCounter);
-      e.target.querySelectorAll('.info-row').forEach((r, i) => {
-        setTimeout(() => r.classList.add('visible'), i * 80);
-      });
+      e.target.querySelectorAll('.info-row').forEach((r, i) => { setTimeout(() => r.classList.add('visible'), i * 80); });
     }
   });
 }, { threshold: 0.1 });
@@ -209,10 +201,6 @@ function toggleSummary(id) {
 }
 
 // ===== CONTACT FORM =====
-const EMAILJS_SERVICE_ID  = 'YOUR_SERVICE_ID';
-const EMAILJS_TEMPLATE_ID = 'YOUR_TEMPLATE_ID';
-const EMAILJS_PUBLIC_KEY  = 'YOUR_PUBLIC_KEY';
-
 document.getElementById('contact-form').addEventListener('submit', function(e) {
   e.preventDefault();
   const btn = this.querySelector('button[type="submit"]');
@@ -220,14 +208,7 @@ document.getElementById('contact-form').addEventListener('submit', function(e) {
   const orig = btn.innerHTML;
   btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
   btn.disabled = true;
-  const data = {
-    from_name: this.name.value,
-    reply_to: this.email.value,
-    subject: this.subject.value,
-    message: this.message.value,
-    to_name: 'Rajesh Kumar'
-  };
-  const mailtoLink = `mailto:bomalleenirajeshkumar@gmail.com?subject=${encodeURIComponent(data.subject || 'Portfolio Contact')}&body=${encodeURIComponent('Name: ' + data.from_name + '\nEmail: ' + data.reply_to + '\n\n' + data.message)}`;
+  const mailtoLink = `mailto:bomalleenirajeshkumar@gmail.com?subject=${encodeURIComponent(this.subject.value || 'Portfolio Contact')}&body=${encodeURIComponent('Name: ' + this.name.value + '\nEmail: ' + this.email.value + '\n\n' + this.message.value)}`;
   window.location.href = mailtoLink;
   setTimeout(() => {
     status.textContent = '✓ Opening your email client...';
@@ -255,17 +236,17 @@ function getDefaultData() {
     skills: 5,
     yearLabel: '3rd Year B.Tech',
     skills_list: [
-      { name: 'HTML5',        level: 85, certFile: 'html-cert.jpg.jpeg',    status: 'Certified'   },
-      { name: 'CSS3',         level: 80, certFile: 'css-cert.jpeg',         status: 'Certified'   },
-      { name: 'JavaScript',   level: 70, certFile: 'js-cert.jpg',           status: 'On Progress' },
-      { name: 'C Programming',level: 75, certFile: 'c-cert.jpg.jpeg',       status: 'On Progress' },
-      { name: 'Python',       level: 72, certFile: 'python-cert.jpg.jpeg',  status: 'Certified'   }
+      { name: 'HTML5',         level: 85, certFile: 'html-cert.jpg.jpeg',   status: 'Certified'   },
+      { name: 'CSS3',          level: 80, certFile: 'css-cert.jpeg',        status: 'Certified'   },
+      { name: 'JavaScript',    level: 70, certFile: 'js-cert.jpg',          status: 'On Progress' },
+      { name: 'C Programming', level: 75, certFile: 'c-cert.jpg.jpeg',      status: 'On Progress' },
+      { name: 'Python',        level: 72, certFile: 'python-cert.jpg.jpeg', status: 'Certified'   }
     ],
     participations: [
-      { icon:'fas fa-trophy',      title:'Hackathons & Competitions', detail:'Participated in National-level Department Fest held at MITS deemed to be University', summary:'Participated in inter-college hackathon events where teams collaborated to solve real-world problems within time constraints.', certFile:'hackathon1.jpeg',    certTitle:'Hackathon Certificate' },
-      { icon:'fas fa-laptop-code', title:'Workshops & Seminars',      detail:'Participated in Mini Project Expo held at Aditya College of Engineering and Organised by Dept of AI&DS', summary:'Attended hands-on workshops covering web development technologies, including HTML/CSS/JS frameworks.', certFile:'workshop-cert.jpeg', certTitle:'Workshop Certificate'  },
-      { icon:'fas fa-university',  title:'Academic Activities',       detail:'Active participant in departmental events at Aditya College', summary:'Actively participated in various departmental and college-level academic events including technical symposiums, paper presentations.', certFile:'academic-cert.jpeg', certTitle:'Academic Certificate'  },
-      { icon:'fas fa-medal',       title:'Online Certifications',     detail:'Completed professional online courses and certifications', summary:'Completed various online courses through platforms like Coursera, NPTEL, and similar platforms.', certFile:'extra-cert.jpeg',    certTitle:'Online Certification'  }
+      { icon:'fas fa-trophy',      title:'Hackathons & Competitions', detail:'Participated in National-level Department Fest held at MITS deemed to be University',           summary:'Participated in inter-college hackathon events where teams collaborated to solve real-world problems within time constraints.',                                  certFile:'hackathon1.jpeg',    certTitle:'Hackathon Certificate' },
+      { icon:'fas fa-laptop-code', title:'Workshops & Seminars',      detail:'Participated in Mini Project Expo held at Aditya College of Engineering and Organised by Dept of AI&DS', summary:'Attended hands-on workshops covering web development technologies, including HTML/CSS/JS frameworks.',                                                   certFile:'workshop-cert.jpeg', certTitle:'Workshop Certificate'  },
+      { icon:'fas fa-university',  title:'Academic Activities',       detail:'Active participant in departmental events at Aditya College',                                  summary:'Actively participated in various departmental and college-level academic events including technical symposiums, paper presentations.',                          certFile:'academic-cert.jpeg', certTitle:'Academic Certificate'  },
+      { icon:'fas fa-medal',       title:'Online Certifications',     detail:'Completed professional online courses and certifications',                                     summary:'Completed various online courses through platforms like Coursera, NPTEL, and similar platforms.',                                                             certFile:'extra-cert.jpeg',    certTitle:'Online Certification'  }
     ]
   };
 }
@@ -281,43 +262,87 @@ function savePortfolioData(data) {
   localStorage.setItem('portfolio_data', JSON.stringify(data));
 }
 
-// ===== JSONBIN INTEGRATION =====
-// Fetch latest data from JSONBin — runs on every page load for all visitors
+// ===== GITHUB INTEGRATION =====
+// Uses a public CORS proxy (corsproxy.io) to avoid browser CORS restrictions.
+// Your token is stored only in YOUR browser's localStorage — never exposed to visitors.
+
+function getGHConfig() {
+  return {
+    token:  localStorage.getItem('gh_token')  || '',
+    repo:   localStorage.getItem('gh_repo')   || '',
+    branch: localStorage.getItem('gh_branch') || 'main',
+    path:   localStorage.getItem('gh_path')   || 'data.json'
+  };
+}
+
+// Fetch latest portfolio data from GitHub on every page load
 async function fetchRemoteData() {
-  const binId  = localStorage.getItem('jb_bin_id')  || '';
-  const apiKey = localStorage.getItem('jb_api_key') || '';
-  if (!binId || !apiKey) return;
+  const { repo, branch, path } = getGHConfig();
+  if (!repo) return;
   try {
-    const res = await fetch('https://api.jsonbin.io/v3/b/' + binId + '/latest', {
-      headers: { 'X-Master-Key': apiKey, 'X-Bin-Meta': 'false' }
-    });
+    // Use raw.githubusercontent.com — no auth needed, no CORS issues, publicly readable
+    const url = 'https://raw.githubusercontent.com/' + repo + '/' + branch + '/' + path + '?t=' + Date.now();
+    const res = await fetch(url);
     if (!res.ok) return;
-    const json = await res.json();
-    if (json && typeof json === 'object') {
-      const merged = Object.assign({}, getDefaultData(), json);
+    const data = await res.json();
+    if (data && typeof data === 'object') {
+      const merged = Object.assign({}, getDefaultData(), data);
       localStorage.setItem('portfolio_data', JSON.stringify(merged));
       applyDataToPage(merged);
     }
   } catch(e) { /* silent — page still works with local data */ }
 }
 
-// Push current data to JSONBin — called by admin Push Live button
-async function pushRemoteData(data) {
-  const binId  = localStorage.getItem('jb_bin_id')  || '';
-  const apiKey = localStorage.getItem('jb_api_key') || '';
-  if (!binId)  return { ok: false, error: 'Bin ID is empty. Paste your Bin ID and click Save Settings.' };
-  if (!apiKey) return { ok: false, error: 'Master Key is empty. Paste your Master Key and click Save Settings.' };
+// Push portfolio data.json to GitHub via API
+async function pushToGitHub(data) {
+  const { token, repo, branch, path } = getGHConfig();
+  if (!token) return { ok: false, error: 'GitHub Token is empty. Paste it above and click Save Settings.' };
+  if (!repo)  return { ok: false, error: 'Repo is empty. Enter your repo (username/reponame) and click Save Settings.' };
+
+  const apiUrl = 'https://api.github.com/repos/' + repo + '/contents/' + path;
+  const headers = {
+    'Authorization': 'token ' + token,
+    'Accept': 'application/vnd.github+json',
+    'Content-Type': 'application/json'
+  };
+
   try {
-    const res = await fetch('https://api.jsonbin.io/v3/b/' + binId, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json', 'X-Master-Key': apiKey },
-      body: JSON.stringify(data)
+    // Get current SHA (required to update existing file)
+    let sha = null;
+    const getRes = await fetch(apiUrl + '?ref=' + branch, { headers });
+    if (getRes.ok) {
+      const getJson = await getRes.json();
+      sha = getJson.sha;
+    } else if (getRes.status === 401) {
+      return { ok: false, error: 'Invalid token. Check your GitHub Personal Access Token.' };
+    } else if (getRes.status === 404) {
+      sha = null; // file doesn't exist yet — will be created
+    } else {
+      return { ok: false, error: 'GitHub error ' + getRes.status };
+    }
+
+    // Encode data as base64
+    const content = btoa(unescape(encodeURIComponent(JSON.stringify(data, null, 2))));
+
+    const body = {
+      message: '[portfolio] update data ' + new Date().toISOString().slice(0, 16),
+      content: content,
+      branch:  branch
+    };
+    if (sha) body.sha = sha;
+
+    const putRes = await fetch(apiUrl, {
+      method:  'PUT',
+      headers: headers,
+      body:    JSON.stringify(body)
     });
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}));
-      return { ok: false, error: err.message || ('JSONBin error ' + res.status) };
+
+    if (!putRes.ok) {
+      const err = await putRes.json().catch(() => ({}));
+      return { ok: false, error: err.message || 'GitHub PUT error ' + putRes.status };
     }
     return { ok: true };
+
   } catch(e) {
     return { ok: false, error: e.message };
   }
@@ -328,7 +353,7 @@ function applyDataToPage(data) {
   document.querySelectorAll('.stat-num[data-count]').forEach(el => {
     if (parseFloat(el.dataset.count) > 9) {
       el.dataset.count = data.cgpa;
-      el.textContent = data.cgpa;
+      el.textContent   = data.cgpa;
     }
   });
   document.querySelectorAll('.stat').forEach(st => {
@@ -336,7 +361,7 @@ function applyDataToPage(data) {
     const num = st.querySelector('.stat-num');
     if (lbl && lbl.textContent === 'Skills' && num) {
       num.dataset.count = data.skills;
-      num.textContent = data.skills + '+';
+      num.textContent   = data.skills + '+';
     }
   });
   document.querySelectorAll('.info-val.accent').forEach(el => {
@@ -346,8 +371,7 @@ function applyDataToPage(data) {
   });
   const skillCards = document.querySelectorAll('.skill-card');
   (data.skills_list || []).forEach((sk, i) => {
-    const card = skillCards[i];
-    if (!card) return;
+    const card = skillCards[i]; if (!card) return;
     const nameEl = card.querySelector('.skill-name');
     const fill   = card.querySelector('.skill-fill');
     const lbl    = card.querySelector('.skill-cert-label');
@@ -358,8 +382,7 @@ function applyDataToPage(data) {
   });
   const partCards = document.querySelectorAll('.part-card');
   (data.participations || []).forEach((p, i) => {
-    const card = partCards[i];
-    if (!card) return;
+    const card = partCards[i]; if (!card) return;
     const titleEl   = card.querySelector('.part-title');
     const detailEl  = card.querySelector('.part-detail');
     const summaryEl = card.querySelector('.part-summary');
@@ -386,29 +409,28 @@ function injectAdminCSS() {
     .admin-row label { font-size:0.8rem;color:#888;min-width:120px; }
     .admin-row input,.admin-row textarea { flex:1;background:#0a0a14;border:1px solid #00d4ff33;border-radius:6px;color:#cdd6f4;padding:7px 10px;font-size:0.85rem;font-family:inherit;min-width:0; }
     .admin-row input:focus,.admin-row textarea:focus { outline:none;border-color:#00d4ff88; }
-    .admin-btn { padding:8px 18px;border-radius:6px;border:none;cursor:pointer;font-size:0.82rem;font-family:inherit;font-weight:600;letter-spacing:0.5px; }
+    .admin-btn { padding:8px 18px;border-radius:6px;border:none;cursor:pointer;font-size:0.82rem;font-family:inherit;font-weight:600;letter-spacing:0.5px;transition:opacity 0.2s; }
+    .admin-btn:hover { opacity:0.8; }
     .admin-btn-primary { background:#00d4ff22;color:#00d4ff;border:1px solid #00d4ff55; }
     .admin-btn-danger  { background:#ff4d4d22;color:#ff4d4d;border:1px solid #ff4d4d44; }
     .admin-btn-success { background:#00ff8822;color:#00ff88;border:1px solid #00ff8844; }
     .admin-close { position:absolute;top:18px;right:20px;background:none;border:none;color:#888;font-size:1.4rem;cursor:pointer;line-height:1; }
     .admin-close:hover { color:#ff4d4d; }
-    .admin-save-bar { display:flex;align-items:center;gap:12px;padding-top:16px;border-top:1px solid #ffffff11;flex-wrap:wrap; }
+    .admin-save-bar { display:flex;align-items:center;gap:10px;padding-top:16px;border-top:1px solid #ffffff11;flex-wrap:wrap; }
     .admin-save-msg { font-size:0.8rem;color:#00ff88;opacity:0;transition:opacity 0.3s; }
     .admin-skill-row,.admin-part-row { background:#ffffff06;border-radius:8px;padding:10px 12px;margin-bottom:8px;border:1px solid #ffffff0a; }
-    .admin-part-row input { margin-bottom:6px;width:100%;box-sizing:border-box; }
     #admin-pw-screen { text-align:center; }
     #admin-pw-screen h2 { margin-bottom:20px; }
-    #admin-pw-input { display:block;margin:0 auto 14px;width:220px;text-align:center;font-size:1.1rem;letter-spacing:3px; }
+    #admin-pw-input { display:block;margin:0 auto 14px;width:220px;text-align:center;font-size:1.1rem;letter-spacing:3px;background:#0a0a14;border:1px solid #00d4ff33;border-radius:6px;color:#cdd6f4;padding:10px; }
     #admin-pw-err { color:#ff4d4d;font-size:0.82rem;min-height:18px;margin-bottom:8px; }
-    #jb-push-status { font-size:0.8rem;font-family:monospace;margin-top:10px;min-height:18px; }
+    #gh-push-status { font-size:0.8rem;font-family:monospace;margin-top:10px;min-height:18px;line-height:1.5; }
   `;
   document.head.appendChild(s);
 }
 
 function buildAdminPanel() {
-  const data = loadPortfolioData();
-  const binId  = localStorage.getItem('jb_bin_id')  || '';
-  const apiKey = localStorage.getItem('jb_api_key') || '';
+  const data   = loadPortfolioData();
+  const cfg    = getGHConfig();
 
   const skillRows = (data.skills_list || []).map((sk, i) => `
     <div class="admin-skill-row" id="skill-row-${i}">
@@ -428,7 +450,7 @@ function buildAdminPanel() {
     <div class="admin-part-row" id="part-row-${i}">
       <div class="admin-row"><label>Title</label><input type="text" id="pt-title-${i}" value="${p.title}"></div>
       <div class="admin-row"><label>Detail</label><input type="text" id="pt-detail-${i}" value="${p.detail}"></div>
-      <div class="admin-row"><label>Cert file</label><input type="text" id="pt-cert-${i}" value="${p.certFile}"><input type="text" id="pt-certtitle-${i}" value="${p.certTitle}" placeholder="Certificate title"></div>
+      <div class="admin-row"><label>Cert file</label><input type="text" id="pt-cert-${i}" value="${p.certFile}"><input type="text" id="pt-certtitle-${i}" value="${p.certTitle}"></div>
       <div class="admin-row"><label>Summary</label><textarea id="pt-summary-${i}" rows="2">${p.summary}</textarea></div>
     </div>`).join('');
 
@@ -457,27 +479,31 @@ function buildAdminPanel() {
       </div>
 
       <div class="admin-section">
-        <h3>&#127760; JSONBin — Live Sync</h3>
-        <p style="font-size:0.78rem;color:#555;margin:0 0 12px">Save your Bin ID and Master Key once. Then use <strong style="color:#00ff88">Push Live</strong> to update for everyone.</p>
+        <h3>&#128279; GitHub Settings</h3>
+        <p style="font-size:0.78rem;color:#555;margin:0 0 14px">Your token is saved only in <strong style="color:#607a8f">your browser</strong> — never visible to anyone else. Fill in once, then just use Push Live every time.</p>
         <div class="admin-row">
-          <label>Bin ID</label>
-          <input type="text" id="adm-jb-bin" placeholder="Paste your Bin ID here" value="${binId}">
+          <label>Token</label>
+          <input type="password" id="adm-gh-token" value="${cfg.token}" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" autocomplete="off">
         </div>
         <div class="admin-row">
-          <label>Master Key</label>
-          <input type="password" id="adm-jb-key" placeholder="Paste your Master Key here" value="${apiKey}">
+          <label>Repo</label>
+          <input type="text" id="adm-gh-repo" value="${cfg.repo}" placeholder="username/portfolio">
         </div>
-        <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;align-items:center">
-          <button class="admin-btn" style="background:#ffffff0a;color:#aaa;border:1px solid #ffffff15;font-size:0.78rem" onclick="saveJBSettings()">&#128190; Save Settings</button>
-          <button class="admin-btn" style="background:#7b61ff22;color:#a895ff;border:1px solid #7b61ff44;font-size:0.78rem" onclick="testJBConnection()">&#128301; Test</button>
-          <span id="jb-test-msg" style="font-size:0.78rem;opacity:0;transition:opacity 0.3s;color:#00ff88"></span>
+        <div class="admin-row">
+          <label>Branch</label>
+          <input type="text" id="adm-gh-branch" value="${cfg.branch}" placeholder="main">
         </div>
-        <p style="font-size:0.72rem;color:#444;margin-top:10px;line-height:1.8">
-          <strong style="color:#607a8f">How to get these:</strong><br>
-          1. Go to <span style="color:#00d4ff88">jsonbin.io</span> &#8594; log in &#8594; click <strong style="color:#607a8f">+ New Bin</strong><br>
-          2. Paste <code style="color:#00ff8877">{"portfolio":true}</code> and click Create<br>
-          3. Copy the <strong style="color:#607a8f">Bin ID</strong> from the URL (after /b/)<br>
-          4. Go to <strong style="color:#607a8f">Account &#8594; API Keys</strong> &#8594; copy Master Key
+        <div style="display:flex;gap:8px;margin-top:6px;flex-wrap:wrap;align-items:center">
+          <button class="admin-btn" style="background:#ffffff0a;color:#aaa;border:1px solid #ffffff15;font-size:0.78rem" onclick="saveGHSettings()">&#128190; Save Settings</button>
+          <button class="admin-btn" style="background:#7b61ff22;color:#a895ff;border:1px solid #7b61ff44;font-size:0.78rem" onclick="testGHConnection()">&#128301; Test</button>
+          <span id="gh-test-msg" style="font-size:0.78rem;opacity:0;transition:opacity 0.3s;color:#00ff88"></span>
+        </div>
+        <p style="font-size:0.72rem;color:#444;margin-top:12px;line-height:1.8">
+          <strong style="color:#607a8f">How to create a token:</strong><br>
+          1. Go to <span style="color:#00d4ff88">github.com</span> &#8594; Settings &#8594; Developer settings<br>
+          2. Personal access tokens &#8594; Fine-grained tokens &#8594; Generate new token<br>
+          3. Select your portfolio repo &#8594; Contents: <strong style="color:#607a8f">Read &amp; Write</strong><br>
+          4. Generate &amp; paste the token above
         </p>
       </div>
 
@@ -488,35 +514,34 @@ function buildAdminPanel() {
 
       <div class="admin-save-bar">
         <button class="admin-btn admin-btn-primary" onclick="saveAdmin()">&#128190; Save &amp; Preview</button>
-        <button class="admin-btn admin-btn-success" onclick="pushLive()">&#127760; Push Live</button>
-        <button class="admin-btn admin-btn-danger" onclick="resetAdmin()">Reset</button>
+        <button class="admin-btn admin-btn-success" onclick="pushLive()">&#128640; Push Live</button>
+        <button class="admin-btn admin-btn-danger"  onclick="resetAdmin()">Reset</button>
         <span class="admin-save-msg" id="adm-save-msg">&#10003; Saved!</span>
       </div>
-      <div id="jb-push-status"></div>
+      <div id="gh-push-status"></div>
     </div>`;
 }
 
-// Save admin form to localStorage + apply to page
 function saveAdmin() {
-  const data = loadPortfolioData();
+  const data     = loadPortfolioData();
   data.cgpa      = document.getElementById('adm-cgpa').value.trim();
   data.skills    = parseInt(document.getElementById('adm-skills').value) || 5;
   data.yearLabel = document.getElementById('adm-year').value.trim();
 
   data.skills_list = Array.from(document.querySelectorAll('[id^="skill-row-"]')).map((_, i) => ({
-    name:     document.getElementById('sk-name-'   + i)?.value || '',
+    name:     document.getElementById('sk-name-'    + i)?.value || '',
     level:    parseInt(document.getElementById('sk-lvl-' + i)?.value) || 0,
-    certFile: document.getElementById('sk-cert-'   + i)?.value || '',
-    status:   document.getElementById('sk-status-' + i)?.value || ''
+    certFile: document.getElementById('sk-cert-'    + i)?.value || '',
+    status:   document.getElementById('sk-status-'  + i)?.value || ''
   }));
 
   data.participations = Array.from(document.querySelectorAll('[id^="part-row-"]')).map((_, i) => ({
     icon:      (loadPortfolioData().participations[i] || {}).icon || 'fas fa-star',
-    title:     document.getElementById('pt-title-'    + i)?.value || '',
-    detail:    document.getElementById('pt-detail-'   + i)?.value || '',
-    certFile:  document.getElementById('pt-cert-'     + i)?.value || '',
-    certTitle: document.getElementById('pt-certtitle-'+ i)?.value || '',
-    summary:   document.getElementById('pt-summary-'  + i)?.value || ''
+    title:     document.getElementById('pt-title-'     + i)?.value || '',
+    detail:    document.getElementById('pt-detail-'    + i)?.value || '',
+    certFile:  document.getElementById('pt-cert-'      + i)?.value || '',
+    certTitle: document.getElementById('pt-certtitle-' + i)?.value || '',
+    summary:   document.getElementById('pt-summary-'   + i)?.value || ''
   }));
 
   savePortfolioData(data);
@@ -527,35 +552,33 @@ function saveAdmin() {
   if (msg) { msg.style.opacity = '1'; setTimeout(() => msg.style.opacity = '0', 2500); }
 }
 
-// Save JSONBin credentials — reads directly from input fields
-function saveJBSettings() {
-  const binEl = document.getElementById('adm-jb-bin');
-  const keyEl = document.getElementById('adm-jb-key');
-  const bin = binEl ? binEl.value.trim() : '';
-  const key = keyEl ? keyEl.value.trim() : '';
-  if (bin) localStorage.setItem('jb_bin_id',  bin);
-  if (key) localStorage.setItem('jb_api_key', key);
-  const m = document.getElementById('jb-test-msg');
+function saveGHSettings() {
+  const t = document.getElementById('adm-gh-token')?.value.trim();
+  const r = document.getElementById('adm-gh-repo')?.value.trim();
+  const b = document.getElementById('adm-gh-branch')?.value.trim();
+  if (t) localStorage.setItem('gh_token',  t);
+  if (r) localStorage.setItem('gh_repo',   r);
+  if (b) localStorage.setItem('gh_branch', b);
+  localStorage.setItem('gh_path', 'data.json');
+  const m = document.getElementById('gh-test-msg');
   if (m) { m.style.color = '#00ff88'; m.textContent = '\u2713 Settings saved!'; m.style.opacity = '1'; setTimeout(() => m.style.opacity = '0', 2500); }
 }
 
-// Test JSONBin connection
-async function testJBConnection() {
-  saveJBSettings();
-  const m = document.getElementById('jb-test-msg');
-  const binId  = localStorage.getItem('jb_bin_id')  || '';
-  const apiKey = localStorage.getItem('jb_api_key') || '';
-  if (!binId || !apiKey) {
-    if (m) { m.style.color = '#ff6b6b'; m.textContent = '\u2717 Fill in both fields first'; m.style.opacity = '1'; setTimeout(() => m.style.opacity = '0', 3000); }
+async function testGHConnection() {
+  saveGHSettings();
+  const m = document.getElementById('gh-test-msg');
+  const { token, repo, branch } = getGHConfig();
+  if (!token || !repo) {
+    if (m) { m.style.color = '#ff6b6b'; m.textContent = '\u2717 Fill in Token and Repo first'; m.style.opacity = '1'; setTimeout(() => m.style.opacity = '0', 3000); }
     return;
   }
   if (m) { m.style.color = '#607a8f'; m.textContent = 'Testing...'; m.style.opacity = '1'; }
   try {
-    const res = await fetch('https://api.jsonbin.io/v3/b/' + binId + '/latest', {
-      headers: { 'X-Master-Key': apiKey, 'X-Bin-Meta': 'false' }
+    const res = await fetch('https://api.github.com/repos/' + repo, {
+      headers: { 'Authorization': 'token ' + token, 'Accept': 'application/vnd.github+json' }
     });
     if (res.ok) {
-      if (m) { m.style.color = '#00ff88'; m.textContent = '\u2713 Connected!'; setTimeout(() => m.style.opacity = '0', 3000); }
+      if (m) { m.style.color = '#00ff88'; m.textContent = '\u2713 Connected to repo!'; setTimeout(() => m.style.opacity = '0', 3000); }
     } else {
       const err = await res.json().catch(() => ({}));
       if (m) { m.style.color = '#ff6b6b'; m.textContent = '\u2717 ' + (err.message || 'Error ' + res.status); setTimeout(() => m.style.opacity = '0', 4000); }
@@ -565,36 +588,26 @@ async function testJBConnection() {
   }
 }
 
-// Push Live — save first then push to JSONBin
 async function pushLive() {
   saveAdmin();
-  saveJBSettings();
+  saveGHSettings();
 
-  const status = document.getElementById('jb-push-status');
-  const binId  = localStorage.getItem('jb_bin_id')  || '';
-  const apiKey = localStorage.getItem('jb_api_key') || '';
+  const status = document.getElementById('gh-push-status');
+  const { token, repo } = getGHConfig();
 
-  if (!binId) {
-    status.style.color = '#ff6b6b';
-    status.textContent = '\u2717 Bin ID is empty \u2014 paste it above and click Save Settings first.';
-    return;
-  }
-  if (!apiKey) {
-    status.style.color = '#ff6b6b';
-    status.textContent = '\u2717 Master Key is empty \u2014 paste it above and click Save Settings first.';
-    return;
-  }
+  if (!token) { status.style.color = '#ff6b6b'; status.textContent = '\u2717 Token is empty \u2014 paste your GitHub token above and click Save Settings.'; return; }
+  if (!repo)  { status.style.color = '#ff6b6b'; status.textContent = '\u2717 Repo is empty \u2014 enter username/reponame above and click Save Settings.'; return; }
 
   status.style.color = '#607a8f';
-  status.textContent = '\u25e2 Pushing live...';
+  status.textContent = '\u25e2 Pushing to GitHub...';
 
-  const data = loadPortfolioData();
-  const result = await pushRemoteData(data);
+  const data   = loadPortfolioData();
+  const result = await pushToGitHub(data);
 
   if (result.ok) {
     status.style.color = '#00ff88';
-    status.textContent = '\u2713 Done! Your portfolio is now updated for everyone.';
-    setTimeout(() => { status.textContent = ''; }, 6000);
+    status.textContent = '\u2713 Pushed! Your portfolio updates for everyone within seconds.';
+    setTimeout(() => { status.textContent = ''; }, 7000);
   } else {
     status.style.color = '#ff6b6b';
     status.textContent = '\u2717 ' + result.error;
@@ -636,7 +649,7 @@ function openAdmin() {
         <button class="admin-close" onclick="closeAdmin()">&#215;</button>
         <div id="admin-pw-screen">
           <h2>&#9889; Admin Access</h2>
-          <input class="admin-row" id="admin-pw-input" type="password" placeholder="Enter password" autocomplete="off">
+          <input id="admin-pw-input" type="password" placeholder="Enter password" autocomplete="off">
           <div id="admin-pw-err"></div>
           <button class="admin-btn admin-btn-primary" onclick="checkAdminPw()">Unlock</button>
         </div>
@@ -684,7 +697,7 @@ if (new URLSearchParams(window.location.search).get('admin') === 'true') {
   window.addEventListener('load', openAdmin);
 }
 
-// On page load: apply local data immediately, then fetch remote update from JSONBin
+// On page load: apply local data, then fetch latest from GitHub
 window.addEventListener('load', () => {
   const saved = localStorage.getItem('portfolio_data');
   if (saved) { try { applyDataToPage(JSON.parse(saved)); } catch(e) {} }
