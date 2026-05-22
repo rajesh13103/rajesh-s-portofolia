@@ -430,7 +430,7 @@ function injectAdminCSS() {
 
 function buildAdminPanel() {
   const data   = loadPortfolioData();
-  const cfg    = getGHConfig();
+  const cfg = getGHConfig();
 
   const skillRows = (data.skills_list || []).map((sk, i) => `
     <div class="admin-skill-row" id="skill-row-${i}">
@@ -554,12 +554,9 @@ function saveAdmin() {
 
 function saveGHSettings() {
   const t = document.getElementById('adm-gh-token')?.value.trim();
-  const r = document.getElementById('adm-gh-repo')?.value.trim();
-  const b = document.getElementById('adm-gh-branch')?.value.trim();
-  if (t) localStorage.setItem('gh_token',  t);
-  if (r) localStorage.setItem('gh_repo',   r);
-  if (b) localStorage.setItem('gh_branch', b);
-  localStorage.setItem('gh_path', 'data.json');
+  const g = document.getElementById('adm-gh-gist')?.value.trim();
+  if (t) localStorage.setItem('gh_token',   t);
+  if (g) localStorage.setItem('gh_gist_id', g);
   const m = document.getElementById('gh-test-msg');
   if (m) { m.style.color = '#00ff88'; m.textContent = '\u2713 Settings saved!'; m.style.opacity = '1'; setTimeout(() => m.style.opacity = '0', 2500); }
 }
@@ -567,21 +564,22 @@ function saveGHSettings() {
 async function testGHConnection() {
   saveGHSettings();
   const m = document.getElementById('gh-test-msg');
-  const { token, repo, branch } = getGHConfig();
-  if (!token || !repo) {
-    if (m) { m.style.color = '#ff6b6b'; m.textContent = '\u2717 Fill in Token and Repo first'; m.style.opacity = '1'; setTimeout(() => m.style.opacity = '0', 3000); }
+  const { token } = getGHConfig();
+  if (!token) {
+    if (m) { m.style.color = '#ff6b6b'; m.textContent = '\u2717 Paste your token first'; m.style.opacity = '1'; setTimeout(() => m.style.opacity = '0', 3000); }
     return;
   }
   if (m) { m.style.color = '#607a8f'; m.textContent = 'Testing...'; m.style.opacity = '1'; }
   try {
-    const res = await fetch('https://api.github.com/repos/' + repo, {
+    const res = await fetch('https://api.github.com/user', {
       headers: { 'Authorization': 'token ' + token, 'Accept': 'application/vnd.github+json' }
     });
     if (res.ok) {
-      if (m) { m.style.color = '#00ff88'; m.textContent = '\u2713 Connected to repo!'; setTimeout(() => m.style.opacity = '0', 3000); }
+      const user = await res.json();
+      if (m) { m.style.color = '#00ff88'; m.textContent = '\u2713 Connected as ' + user.login + '!'; setTimeout(() => m.style.opacity = '0', 3000); }
     } else {
       const err = await res.json().catch(() => ({}));
-      if (m) { m.style.color = '#ff6b6b'; m.textContent = '\u2717 ' + (err.message || 'Error ' + res.status); setTimeout(() => m.style.opacity = '0', 4000); }
+      if (m) { m.style.color = '#ff6b6b'; m.textContent = '\u2717 ' + (err.message || 'Invalid token'); setTimeout(() => m.style.opacity = '0', 4000); }
     }
   } catch(e) {
     if (m) { m.style.color = '#ff6b6b'; m.textContent = '\u2717 ' + e.message; setTimeout(() => m.style.opacity = '0', 4000); }
@@ -593,20 +591,31 @@ async function pushLive() {
   saveGHSettings();
 
   const status = document.getElementById('gh-push-status');
-  const { token, repo } = getGHConfig();
+  const { token } = getGHConfig();
 
-  if (!token) { status.style.color = '#ff6b6b'; status.textContent = '\u2717 Token is empty \u2014 paste your GitHub token above and click Save Settings.'; return; }
-  if (!repo)  { status.style.color = '#ff6b6b'; status.textContent = '\u2717 Repo is empty \u2014 enter username/reponame above and click Save Settings.'; return; }
+  if (!token) {
+    status.style.color = '#ff6b6b';
+    status.textContent = '\u2717 Token is empty \u2014 paste your GitHub token above and click Save Settings.';
+    return;
+  }
 
   status.style.color = '#607a8f';
-  status.textContent = '\u25e2 Pushing to GitHub...';
+  status.textContent = '\u25e2 Pushing to GitHub Gist...';
 
   const data   = loadPortfolioData();
-  const result = await pushToGitHub(data);
+  const result = await pushToGist(data);
 
   if (result.ok) {
-    status.style.color = '#00ff88';
-    status.textContent = '\u2713 Pushed! Your portfolio updates for everyone within seconds.';
+    if (result.created) {
+      // Update the Gist ID field in the panel so user can see it
+      const gistInput = document.getElementById('adm-gh-gist');
+      if (gistInput) gistInput.value = result.gistId;
+      status.style.color = '#00ff88';
+      status.textContent = '\u2713 Gist created & data pushed! Everyone sees your portfolio now.';
+    } else {
+      status.style.color = '#00ff88';
+      status.textContent = '\u2713 Pushed! Your portfolio is updated for everyone instantly.';
+    }
     setTimeout(() => { status.textContent = ''; }, 7000);
   } else {
     status.style.color = '#ff6b6b';
