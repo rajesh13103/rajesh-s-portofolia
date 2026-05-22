@@ -305,6 +305,13 @@ const ADMIN_PASSWORD = 'rajesh2026'; // <-- CHANGE THIS
 
 // Data store — persists in localStorage
 function loadPortfolioData() {
+  // If a baked snapshot was injected by the admin push, use it as the base
+  if (typeof BAKED_PORTFOLIO_DATA !== 'undefined') {
+    try {
+      const saved = localStorage.getItem('portfolio_data');
+      return saved ? Object.assign({}, BAKED_PORTFOLIO_DATA, JSON.parse(saved)) : BAKED_PORTFOLIO_DATA;
+    } catch(e) { return BAKED_PORTFOLIO_DATA; }
+  }
   const defaults = {
     cgpa: '9.58',
     skills: 5,
@@ -503,11 +510,42 @@ function buildAdminPanel() {
         <p style="font-size:0.72rem;color:#444;margin:4px 0 0">Private — never shown to visitors. Use for reminders about what to update.</p>
       </div>
 
-      <div class="admin-save-bar">
-        <button class="admin-btn admin-btn-primary" onclick="saveAdmin()">💾 Save & Apply</button>
-        <button class="admin-btn admin-btn-danger" onclick="resetAdmin()">Reset to Defaults</button>
-        <span class="admin-save-msg" id="adm-save-msg">✓ Saved!</span>
+      <div class="admin-section">
+        <h3>&#128279; GitHub Auto-Deploy</h3>
+        <p style="font-size:0.78rem;color:#666;margin:0 0 12px">Connect once — every save auto-pushes to GitHub and Vercel redeploys live (~30s).</p>
+        <div class="admin-row">
+          <label>GitHub Token</label>
+          <input type="password" id="adm-gh-token" value="${localStorage.getItem('gh_token') || ''}" placeholder="ghp_xxxxxxxxxxxx" autocomplete="off">
+        </div>
+        <div class="admin-row">
+          <label>Repo (user/repo)</label>
+          <input type="text" id="adm-gh-repo" value="${localStorage.getItem('gh_repo') || ''}" placeholder="rajesh/portfolio">
+        </div>
+        <div class="admin-row">
+          <label>Branch</label>
+          <input type="text" id="adm-gh-branch" value="${localStorage.getItem('gh_branch') || 'main'}" placeholder="main">
+        </div>
+        <div class="admin-row">
+          <label>script.js path</label>
+          <input type="text" id="adm-gh-path" value="${localStorage.getItem('gh_path') || 'script.js'}" placeholder="script.js">
+        </div>
+        <div style="display:flex;gap:8px;margin-top:6px;align-items:center;flex-wrap:wrap">
+          <button class="admin-btn" style="background:#ffffff0a;color:#888;border:1px solid #ffffff15;font-size:0.75rem" onclick="saveGithubSettings()">Save Settings</button>
+          <span id="gh-settings-msg" style="font-size:0.75rem;color:#00ff88;opacity:0;transition:opacity 0.3s">&#10003; Settings saved</span>
+        </div>
+        <p style="font-size:0.72rem;color:#444;margin-top:10px">
+          Get a token at <span style="color:#00d4ff88">github.com &#8594; Settings &#8594; Developer settings &#8594; Personal access tokens &#8594; Fine-grained</span>.<br>
+          Give it <strong style="color:#607a8f">Contents: Read &amp; Write</strong> permission on your portfolio repo only.
+        </p>
       </div>
+
+      <div class="admin-save-bar">
+        <button class="admin-btn admin-btn-primary" onclick="saveAdmin()">&#128190; Save &amp; Apply</button>
+        <button class="admin-btn" style="background:#00ff8822;color:#00ff88;border:1px solid #00ff8844" onclick="pushToGitHub()">&#128640; Push Live</button>
+        <button class="admin-btn admin-btn-danger" onclick="resetAdmin()">Reset</button>
+        <span class="admin-save-msg" id="adm-save-msg">&#10003; Saved!</span>
+      </div>
+      <div id="gh-push-status" style="font-size:0.78rem;font-family:monospace;margin-top:10px;min-height:18px;color:#607a8f"></div>
     </div>`;
 }
 
@@ -601,6 +639,101 @@ function resetAdmin() {
   }
 }
 
+// ── GitHub settings ──────────────────────────────────────────────────────
+function saveGithubSettings() {
+  localStorage.setItem('gh_token',  document.getElementById('adm-gh-token')?.value  || '');
+  localStorage.setItem('gh_repo',   document.getElementById('adm-gh-repo')?.value   || '');
+  localStorage.setItem('gh_branch', document.getElementById('adm-gh-branch')?.value || 'main');
+  localStorage.setItem('gh_path',   document.getElementById('adm-gh-path')?.value   || 'script.js');
+  const m = document.getElementById('gh-settings-msg');
+  if (m) { m.style.opacity = '1'; setTimeout(() => m.style.opacity = '0', 2000); }
+}
+
+// ── Push current script.js to GitHub ─────────────────────────────────────
+async function pushToGitHub() {
+  const token  = localStorage.getItem('gh_token');
+  const repo   = localStorage.getItem('gh_repo');
+  const branch = localStorage.getItem('gh_branch') || 'main';
+  const path   = localStorage.getItem('gh_path')   || 'script.js';
+  const status = document.getElementById('gh-push-status');
+
+  if (!token || !repo) {
+    status.style.color = '#ff6b6b';
+    status.textContent = '\u2717 Fill in GitHub Token and Repo first, then click Save Settings.';
+    return;
+  }
+
+  status.style.color = '#607a8f';
+  status.textContent = '\u25e2 Fetching current file SHA...';
+
+  try {
+    const apiBase = 'https://api.github.com/repos/' + repo + '/contents/' + path;
+    const headers = {
+      'Authorization': 'token ' + token,
+      'Accept': 'application/vnd.github+json'
+    };
+
+    // Get current SHA (needed to update the file)
+    let sha = null;
+    const getRes = await fetch(apiBase + '?ref=' + branch, { headers });
+    if (getRes.ok) {
+      const getJson = await getRes.json();
+      sha = getJson.sha;
+    } else if (getRes.status !== 404) {
+      throw new Error('GitHub API error ' + getRes.status + ': ' + await getRes.text());
+    }
+
+    status.textContent = '\u25e2 Building updated script...';
+
+    // Fetch the live script.js source
+    const scriptTag = Array.from(document.querySelectorAll('script[src]'))
+      .find(s => s.src.includes('script.js'));
+    if (!scriptTag) throw new Error('Could not locate script.js URL on this page.');
+
+    const scriptRes = await fetch(scriptTag.src + '?nocache=' + Date.now());
+    let scriptContent = await scriptRes.text();
+
+    // Inject current portfolio data as a baked constant at the top
+    const data = loadPortfolioData();
+    const dataBlob = JSON.stringify(data, null, 2);
+    const injection = '// ===== BAKED DATA (auto-injected by admin panel) =====\n'
+      + 'const BAKED_PORTFOLIO_DATA = ' + dataBlob + ';\n'
+      + '// ===== END BAKED DATA =====\n\n';
+
+    // Remove any previous baked data block
+    scriptContent = scriptContent.replace(/\/\/ ===== BAKED DATA[\s\S]*?\/\/ ===== END BAKED DATA =====\n\n/, '');
+    const finalScript = injection + scriptContent;
+
+    status.textContent = '\u25e2 Pushing to GitHub...';
+
+    const body = {
+      message: '[admin] update portfolio data ' + new Date().toISOString().slice(0, 16),
+      content: btoa(unescape(encodeURIComponent(finalScript))),
+      branch: branch
+    };
+    if (sha) body.sha = sha;
+
+    const putRes = await fetch(apiBase, {
+      method: 'PUT',
+      headers: Object.assign({}, headers, { 'Content-Type': 'application/json' }),
+      body: JSON.stringify(body)
+    });
+
+    if (!putRes.ok) {
+      const err = await putRes.json();
+      throw new Error(err.message || 'PUT failed ' + putRes.status);
+    }
+
+    status.style.color = '#00ff88';
+    status.textContent = '\u2713 Pushed! Vercel is redeploying \u2014 live in ~30 seconds.';
+    setTimeout(() => { status.textContent = ''; }, 8000);
+
+  } catch (err) {
+    status.style.color = '#ff6b6b';
+    status.textContent = '\u2717 ' + err.message;
+  }
+}
+
 function addSkillRow() {
   const data = loadPortfolioData();
   data.skills_list.push({ name: 'New Skill', level: 70, certFile: 'new-cert.jpg', status: 'Certified' });
@@ -623,6 +756,7 @@ function addPartRow() {
   closeAdmin();
   setTimeout(openAdmin, 100);
 }
+
 
 let adminUnlocked = false;
 function openAdmin() {
