@@ -649,7 +649,7 @@ function saveGithubSettings() {
   if (m) { m.style.opacity = '1'; setTimeout(() => m.style.opacity = '0', 2000); }
 }
 
-// ── Push current script.js to GitHub ─────────────────────────────────────
+// ── Push current script.js to GitHub (via /api/save serverless proxy) ──────
 async function pushToGitHub() {
   const token  = localStorage.getItem('gh_token');
   const repo   = localStorage.getItem('gh_repo');
@@ -659,80 +659,58 @@ async function pushToGitHub() {
 
   if (!token || !repo) {
     status.style.color = '#ff6b6b';
-    status.textContent = '\u2717 Fill in GitHub Token and Repo first, then click Save Settings.';
+    status.textContent = '✗ Fill in GitHub Token and Repo first, then click Save Settings.';
     return;
   }
 
   status.style.color = '#607a8f';
-  status.textContent = '\u25e2 Fetching current file SHA...';
+  status.textContent = '◢ Building updated script...';
 
   try {
-    const apiBase = 'https://api.github.com/repos/' + repo + '/contents/' + path;
-    const headers = {
-      'Authorization': 'token ' + token,
-      'Accept': 'application/vnd.github+json'
-    };
-
-    // Get current SHA (needed to update the file)
-    let sha = null;
-    const getRes = await fetch(apiBase + '?ref=' + branch, { headers });
-    if (getRes.ok) {
-      const getJson = await getRes.json();
-      sha = getJson.sha;
-    } else if (getRes.status !== 404) {
-      throw new Error('GitHub API error ' + getRes.status + ': ' + await getRes.text());
-    }
-
-    status.textContent = '\u25e2 Building updated script...';
-
-    // Fetch the live script.js source
+    // Fetch live script.js source
     const scriptTag = Array.from(document.querySelectorAll('script[src]'))
       .find(s => s.src.includes('script.js'));
     if (!scriptTag) throw new Error('Could not locate script.js URL on this page.');
 
     const scriptRes = await fetch(scriptTag.src + '?nocache=' + Date.now());
+    if (!scriptRes.ok) throw new Error('Could not fetch script.js: ' + scriptRes.status);
     let scriptContent = await scriptRes.text();
 
-    // Inject current portfolio data as a baked constant at the top
+    // Inject current portfolio data as baked constant at the top
     const data = loadPortfolioData();
-    const dataBlob = JSON.stringify(data, null, 2);
     const injection = '// ===== BAKED DATA (auto-injected by admin panel) =====\n'
-      + 'const BAKED_PORTFOLIO_DATA = ' + dataBlob + ';\n'
+      + 'const BAKED_PORTFOLIO_DATA = ' + JSON.stringify(data, null, 2) + ';\n'
       + '// ===== END BAKED DATA =====\n\n';
 
-    // Remove any previous baked data block
+    // Remove any previous baked block
     scriptContent = scriptContent.replace(/\/\/ ===== BAKED DATA[\s\S]*?\/\/ ===== END BAKED DATA =====\n\n/, '');
     const finalScript = injection + scriptContent;
 
-    status.textContent = '\u25e2 Pushing to GitHub...';
+    // Base64 encode for GitHub API
+    const encoded = btoa(unescape(encodeURIComponent(finalScript)));
 
-    const body = {
-      message: '[admin] update portfolio data ' + new Date().toISOString().slice(0, 16),
-      content: btoa(unescape(encodeURIComponent(finalScript))),
-      branch: branch
-    };
-    if (sha) body.sha = sha;
+    status.textContent = '◢ Pushing to GitHub via /api/save...';
 
-    const putRes = await fetch(apiBase, {
-      method: 'PUT',
-      headers: Object.assign({}, headers, { 'Content-Type': 'application/json' }),
-      body: JSON.stringify(body)
+    // Call the Vercel serverless proxy instead of GitHub directly
+    const saveRes = await fetch('/api/save', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token, repo, branch, path, content: encoded })
     });
 
-    if (!putRes.ok) {
-      const err = await putRes.json();
-      throw new Error(err.message || 'PUT failed ' + putRes.status);
-    }
+    const saveJson = await saveRes.json();
+    if (!saveRes.ok) throw new Error(saveJson.error || 'Server error ' + saveRes.status);
 
     status.style.color = '#00ff88';
-    status.textContent = '\u2713 Pushed! Vercel is redeploying \u2014 live in ~30 seconds.';
+    status.textContent = '✓ Pushed! Vercel is redeploying — live in ~30 seconds.';
     setTimeout(() => { status.textContent = ''; }, 8000);
 
   } catch (err) {
     status.style.color = '#ff6b6b';
-    status.textContent = '\u2717 ' + err.message;
+    status.textContent = '✗ ' + err.message;
   }
 }
+
 
 function addSkillRow() {
   const data = loadPortfolioData();
