@@ -305,13 +305,14 @@ const ADMIN_PASSWORD = 'rajesh2026'; // <-- CHANGE THIS
 
 // Data store — persists in localStorage
 function loadPortfolioData() {
-  // If a baked snapshot was injected by the admin push, use it as the base
-  if (typeof BAKED_PORTFOLIO_DATA !== 'undefined') {
-    try {
-      const saved = localStorage.getItem('portfolio_data');
-      return saved ? Object.assign({}, BAKED_PORTFOLIO_DATA, JSON.parse(saved)) : BAKED_PORTFOLIO_DATA;
-    } catch(e) { return BAKED_PORTFOLIO_DATA; }
-  }
+  const defaults = getDefaultPortfolioData();
+  try {
+    const saved = localStorage.getItem('portfolio_data');
+    return saved ? Object.assign({}, defaults, JSON.parse(saved)) : defaults;
+  } catch(e) { return defaults; }
+}
+
+function getDefaultPortfolioData() {
   const defaults = {
     cgpa: '9.58',
     skills: 5,
@@ -359,10 +360,7 @@ function loadPortfolioData() {
       }
     ]
   };
-  try {
-    const saved = localStorage.getItem('portfolio_data');
-    return saved ? Object.assign({}, defaults, JSON.parse(saved)) : defaults;
-  } catch(e) { return defaults; }
+  return defaults;
 }
 
 function savePortfolioData(data) {
@@ -511,41 +509,37 @@ function buildAdminPanel() {
       </div>
 
       <div class="admin-section">
-        <h3>&#128279; GitHub Auto-Deploy</h3>
-        <p style="font-size:0.78rem;color:#666;margin:0 0 12px">Connect once — every save auto-pushes to GitHub and Vercel redeploys live (~30s).</p>
+        <h3>&#127760; JSONBin — Live Sync</h3>
+        <p style="font-size:0.78rem;color:#555;margin:0 0 12px">Free cloud storage — changes you push here are visible to everyone instantly. Setup takes 2 minutes at <span style="color:#00d4ff88">jsonbin.io</span>.</p>
         <div class="admin-row">
-          <label>GitHub Token</label>
-          <input type="password" id="adm-gh-token" value="${localStorage.getItem('gh_token') || ''}" placeholder="ghp_xxxxxxxxxxxx" autocomplete="off">
-        </div>
-        <div class="admin-row">
-          <label>Repo (user/repo)</label>
-          <input type="text" id="adm-gh-repo" value="${localStorage.getItem('gh_repo') || ''}" placeholder="rajesh/portfolio">
+          <label>Bin ID</label>
+          <input type="text" id="adm-jb-bin" value="${localStorage.getItem('jb_bin_id') || ''}" placeholder="6649abcd1234567890abcdef">
         </div>
         <div class="admin-row">
-          <label>Branch</label>
-          <input type="text" id="adm-gh-branch" value="${localStorage.getItem('gh_branch') || 'main'}" placeholder="main">
+          <label>Master Key</label>
+          <input type="password" id="adm-jb-key" value="${localStorage.getItem('jb_api_key') || ''}" placeholder="$2a$10$...">
         </div>
-        <div class="admin-row">
-          <label>script.js path</label>
-          <input type="text" id="adm-gh-path" value="${localStorage.getItem('gh_path') || 'script.js'}" placeholder="script.js">
+        <div style="display:flex;gap:8px;margin-top:8px;align-items:center;flex-wrap:wrap">
+          <button class="admin-btn" style="background:#ffffff0a;color:#888;border:1px solid #ffffff15;font-size:0.75rem" onclick="saveJSONBinSettings()">Save Settings</button>
+          <button class="admin-btn" style="background:#7b61ff22;color:#a895ff;border:1px solid #7b61ff44;font-size:0.75rem" onclick="testJSONBin()">Test Connection</button>
+          <span id="jb-settings-msg" style="font-size:0.75rem;color:#00ff88;opacity:0;transition:opacity 0.3s">&#10003; Done</span>
         </div>
-        <div style="display:flex;gap:8px;margin-top:6px;align-items:center;flex-wrap:wrap">
-          <button class="admin-btn" style="background:#ffffff0a;color:#888;border:1px solid #ffffff15;font-size:0.75rem" onclick="saveGithubSettings()">Save Settings</button>
-          <span id="gh-settings-msg" style="font-size:0.75rem;color:#00ff88;opacity:0;transition:opacity 0.3s">&#10003; Settings saved</span>
-        </div>
-        <p style="font-size:0.72rem;color:#444;margin-top:10px">
-          Get a token at <span style="color:#00d4ff88">github.com &#8594; Settings &#8594; Developer settings &#8594; Personal access tokens &#8594; Fine-grained</span>.<br>
-          Give it <strong style="color:#607a8f">Contents: Read &amp; Write</strong> permission on your portfolio repo only.
+        <p style="font-size:0.72rem;color:#444;margin-top:10px;line-height:1.7">
+          <strong style="color:#607a8f">How to get these:</strong><br>
+          1. Go to <span style="color:#00d4ff88">jsonbin.io</span> and create a free account<br>
+          2. Click <strong style="color:#607a8f">+ Create Bin</strong> — paste <code style="color:#00ff8877">{}</code> as content and save<br>
+          3. Copy the <strong style="color:#607a8f">Bin ID</strong> from the URL<br>
+          4. Go to <strong style="color:#607a8f">Account &rarr; API Keys</strong> and copy your Master Key
         </p>
       </div>
 
       <div class="admin-save-bar">
-        <button class="admin-btn admin-btn-primary" onclick="saveAdmin()">&#128190; Save &amp; Apply</button>
-        <button class="admin-btn" style="background:#00ff8822;color:#00ff88;border:1px solid #00ff8844" onclick="pushToGitHub()">&#128640; Push Live</button>
+        <button class="admin-btn admin-btn-primary" onclick="saveAdmin()">&#128190; Save Locally</button>
+        <button class="admin-btn" style="background:#00ff8822;color:#00ff88;border:1px solid #00ff8844" onclick="pushToJSONBin()">&#127760; Push Live</button>
         <button class="admin-btn admin-btn-danger" onclick="resetAdmin()">Reset</button>
         <span class="admin-save-msg" id="adm-save-msg">&#10003; Saved!</span>
       </div>
-      <div id="gh-push-status" style="font-size:0.78rem;font-family:monospace;margin-top:10px;min-height:18px;color:#607a8f"></div>
+      <div id="jb-push-status" style="font-size:0.78rem;font-family:monospace;margin-top:10px;min-height:18px;color:#607a8f"></div>
     </div>`;
 }
 
@@ -639,78 +633,65 @@ function resetAdmin() {
   }
 }
 
-// ── GitHub settings ──────────────────────────────────────────────────────
-function saveGithubSettings() {
-  localStorage.setItem('gh_token',  document.getElementById('adm-gh-token')?.value  || '');
-  localStorage.setItem('gh_repo',   document.getElementById('adm-gh-repo')?.value   || '');
-  localStorage.setItem('gh_branch', document.getElementById('adm-gh-branch')?.value || 'main');
-  localStorage.setItem('gh_path',   document.getElementById('adm-gh-path')?.value   || 'script.js');
-  const m = document.getElementById('gh-settings-msg');
-  if (m) { m.style.opacity = '1'; setTimeout(() => m.style.opacity = '0', 2000); }
+// ── JSONBin settings ──────────────────────────────────────────────────────
+function saveJSONBinSettings() {
+  localStorage.setItem('jb_bin_id',  document.getElementById('adm-jb-bin')?.value.trim() || '');
+  localStorage.setItem('jb_api_key', document.getElementById('adm-jb-key')?.value.trim() || '');
+  const m = document.getElementById('jb-settings-msg');
+  if (m) { m.textContent = '✓ Settings saved'; m.style.opacity = '1'; setTimeout(() => m.style.opacity = '0', 2500); }
 }
 
-// ── Push current script.js to GitHub (via /api/save serverless proxy) ──────
-async function pushToGitHub() {
-  const token  = localStorage.getItem('gh_token');
-  const repo   = localStorage.getItem('gh_repo');
-  const branch = localStorage.getItem('gh_branch') || 'main';
-  const path   = localStorage.getItem('gh_path')   || 'script.js';
-  const status = document.getElementById('gh-push-status');
+async function testJSONBin() {
+  saveJSONBinSettings();
+  const m = document.getElementById('jb-settings-msg');
+  const { binId, apiKey } = getJSONBinConfig();
+  if (!binId || !apiKey) {
+    if (m) { m.style.color = '#ff6b6b'; m.textContent = '✗ Fill in Bin ID and Key first'; m.style.opacity = '1'; setTimeout(() => { m.style.opacity = '0'; m.style.color = '#00ff88'; }, 3000); }
+    return;
+  }
+  if (m) { m.style.color = '#607a8f'; m.textContent = 'Testing...'; m.style.opacity = '1'; }
+  try {
+    const res = await fetch('https://api.jsonbin.io/v3/b/' + binId + '/latest', {
+      headers: { 'X-Master-Key': apiKey }
+    });
+    if (res.ok) {
+      if (m) { m.style.color = '#00ff88'; m.textContent = '✓ Connected!'; setTimeout(() => { m.style.opacity = '0'; m.style.color = '#00ff88'; }, 2500); }
+    } else {
+      const err = await res.json();
+      if (m) { m.style.color = '#ff6b6b'; m.textContent = '✗ ' + (err.message || 'Error ' + res.status); setTimeout(() => { m.style.opacity = '0'; m.style.color = '#00ff88'; }, 4000); }
+    }
+  } catch(e) {
+    if (m) { m.style.color = '#ff6b6b'; m.textContent = '✗ ' + e.message; setTimeout(() => { m.style.opacity = '0'; m.style.color = '#00ff88'; }, 4000); }
+  }
+}
 
-  if (!token || !repo) {
+// ── Push portfolio data to JSONBin → visible to everyone ─────────────────
+async function pushToJSONBin() {
+  const status = document.getElementById('jb-push-status');
+  saveJSONBinSettings();
+  const { binId, apiKey } = getJSONBinConfig();
+
+  if (!binId || !apiKey) {
     status.style.color = '#ff6b6b';
-    status.textContent = '✗ Fill in GitHub Token and Repo first, then click Save Settings.';
+    status.textContent = '✗ Fill in Bin ID and Master Key first, then click Save Settings.';
     return;
   }
 
   status.style.color = '#607a8f';
-  status.textContent = '◢ Building updated script...';
+  status.textContent = '◢ Pushing your data live...';
 
-  try {
-    // Fetch live script.js source
-    const scriptTag = Array.from(document.querySelectorAll('script[src]'))
-      .find(s => s.src.includes('script.js'));
-    if (!scriptTag) throw new Error('Could not locate script.js URL on this page.');
+  const data = loadPortfolioData();
+  const result = await saveToJSONBin(data);
 
-    const scriptRes = await fetch(scriptTag.src + '?nocache=' + Date.now());
-    if (!scriptRes.ok) throw new Error('Could not fetch script.js: ' + scriptRes.status);
-    let scriptContent = await scriptRes.text();
-
-    // Inject current portfolio data as baked constant at the top
-    const data = loadPortfolioData();
-    const injection = '// ===== BAKED DATA (auto-injected by admin panel) =====\n'
-      + 'const BAKED_PORTFOLIO_DATA = ' + JSON.stringify(data, null, 2) + ';\n'
-      + '// ===== END BAKED DATA =====\n\n';
-
-    // Remove any previous baked block
-    scriptContent = scriptContent.replace(/\/\/ ===== BAKED DATA[\s\S]*?\/\/ ===== END BAKED DATA =====\n\n/, '');
-    const finalScript = injection + scriptContent;
-
-    // Base64 encode for GitHub API
-    const encoded = btoa(unescape(encodeURIComponent(finalScript)));
-
-    status.textContent = '◢ Pushing to GitHub via /api/save...';
-
-    // Call the Vercel serverless proxy instead of GitHub directly
-    const saveRes = await fetch('/api/save', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ token, repo, branch, path, content: encoded })
-    });
-
-    const saveJson = await saveRes.json();
-    if (!saveRes.ok) throw new Error(saveJson.error || 'Server error ' + saveRes.status);
-
+  if (result.ok) {
     status.style.color = '#00ff88';
-    status.textContent = '✓ Pushed! Vercel is redeploying — live in ~30 seconds.';
-    setTimeout(() => { status.textContent = ''; }, 8000);
-
-  } catch (err) {
+    status.textContent = '✓ Live! Everyone sees your updated portfolio now.';
+    setTimeout(() => { status.textContent = ''; }, 6000);
+  } else {
     status.style.color = '#ff6b6b';
-    status.textContent = '✗ ' + err.message;
+    status.textContent = '✗ ' + result.error;
   }
 }
-
 
 function addSkillRow() {
   const data = loadPortfolioData();
@@ -734,7 +715,6 @@ function addPartRow() {
   closeAdmin();
   setTimeout(openAdmin, 100);
 }
-
 
 let adminUnlocked = false;
 function openAdmin() {
@@ -795,6 +775,11 @@ document.addEventListener('keydown', e => {
 if (new URLSearchParams(window.location.search).get('admin') === 'true') {
   window.addEventListener('load', openAdmin);
 }
+
+// Auto-fetch remote data from JSONBin on every page load (so all visitors see latest)
+document.addEventListener('DOMContentLoaded', () => {
+  fetchAndApplyRemoteData();
+});
 
 // Auto-apply any saved data on page load
 window.addEventListener('load', () => {
