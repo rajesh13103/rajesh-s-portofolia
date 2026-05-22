@@ -295,3 +295,399 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
     if (target) { e.preventDefault(); target.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
   });
 });
+
+// ===== HIDDEN ADMIN PANEL =====
+// Access: Press Ctrl+Shift+A  (invisible to viewers)
+// Or visit: yourportfolio.html?admin=true
+// Password is set below — change it to your own!
+
+const ADMIN_PASSWORD = 'rajesh2026'; // <-- CHANGE THIS
+
+// Data store — persists in localStorage
+function loadPortfolioData() {
+  const defaults = {
+    cgpa: '9.58',
+    skills: 5,
+    yearLabel: '3rd Year B.Tech',
+    aboutDesc: "Hey! I'm <span class='highlight'>Rajesh Kumar Bomalleeni</span>, a second-year Electronics & Communication Engineering student with a deep passion for software development and web technologies.",
+    skills_list: [
+      { name: 'HTML5', level: 85, certFile: 'html-cert.jpg.jpeg', status: 'Certified' },
+      { name: 'CSS3', level: 80, certFile: 'css-cert.jpeg', status: 'Certified' },
+      { name: 'JavaScript', level: 70, certFile: 'js-cert.jpg', status: 'On Progress' },
+      { name: 'C Programming', level: 75, certFile: 'c-cert.jpg.jpeg', status: 'On Progress' },
+      { name: 'Python', level: 72, certFile: 'python-cert.jpg.jpeg', status: 'Certified' }
+    ],
+    participations: [
+      {
+        icon: 'fas fa-trophy',
+        title: 'Hackathons & Competitions',
+        detail: 'Participated in National-level Department Fest held at MITS deemed to be University',
+        summary: 'Participated in inter-college hackathon events where teams collaborated to solve real-world problems within time constraints.',
+        certFile: 'hackathon1.jpeg',
+        certTitle: 'Hackathon Certificate'
+      },
+      {
+        icon: 'fas fa-laptop-code',
+        title: 'Workshops & Seminars',
+        detail: 'Participated in Mini Project Expo held at Aditya College of Engineering and Organised by Dept of AI&DS',
+        summary: 'Attended hands-on workshops covering web development technologies, including HTML/CSS/JS frameworks.',
+        certFile: 'workshop-cert.jpeg',
+        certTitle: 'Workshop Certificate'
+      },
+      {
+        icon: 'fas fa-university',
+        title: 'Academic Activities',
+        detail: 'Active participant in departmental events at Aditya College',
+        summary: 'Actively participated in various departmental and college-level academic events including technical symposiums, paper presentations.',
+        certFile: 'academic-cert.jpeg',
+        certTitle: 'Academic Certificate'
+      },
+      {
+        icon: 'fas fa-medal',
+        title: 'Online Certifications',
+        detail: 'Completed professional online courses and certifications',
+        summary: 'Completed various online courses through platforms like Coursera, NPTEL, and similar platforms.',
+        certFile: 'extra-cert.jpeg',
+        certTitle: 'Online Certification'
+      }
+    ]
+  };
+  try {
+    const saved = localStorage.getItem('portfolio_data');
+    return saved ? Object.assign({}, defaults, JSON.parse(saved)) : defaults;
+  } catch(e) { return defaults; }
+}
+
+function savePortfolioData(data) {
+  localStorage.setItem('portfolio_data', JSON.stringify(data));
+}
+
+// Inject admin CSS once
+function injectAdminCSS() {
+  if (document.getElementById('admin-css')) return;
+  const s = document.createElement('style');
+  s.id = 'admin-css';
+  s.textContent = `
+    #admin-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.85);
+      z-index: 99999; display: flex; align-items: center; justify-content: center;
+      font-family: 'Exo 2', sans-serif;
+    }
+    #admin-panel {
+      background: #0d0d1a; border: 1px solid #00d4ff44; border-radius: 12px;
+      width: min(92vw, 640px); max-height: 88vh; overflow-y: auto;
+      padding: 28px 32px; color: #cdd6f4; position: relative;
+    }
+    #admin-panel h2 { color: #00d4ff; font-size: 1.2rem; margin: 0 0 20px;
+      font-family: 'Orbitron', sans-serif; letter-spacing: 2px; }
+    .admin-section { margin-bottom: 24px; border-top: 1px solid #ffffff11; padding-top: 16px; }
+    .admin-section h3 { color: #00ff88; font-size: 0.8rem; letter-spacing: 1.5px;
+      text-transform: uppercase; margin: 0 0 12px; }
+    .admin-row { display: flex; gap: 10px; align-items: center; margin-bottom: 10px; flex-wrap: wrap; }
+    .admin-row label { font-size: 0.8rem; color: #888; min-width: 120px; }
+    .admin-row input, .admin-row textarea, .admin-row select {
+      flex: 1; background: #0a0a14; border: 1px solid #00d4ff33; border-radius: 6px;
+      color: #cdd6f4; padding: 7px 10px; font-size: 0.85rem; font-family: inherit; min-width: 0;
+    }
+    .admin-row input:focus, .admin-row textarea:focus { outline: none; border-color: #00d4ff88; }
+    .admin-btn {
+      padding: 8px 18px; border-radius: 6px; border: none; cursor: pointer;
+      font-size: 0.82rem; font-family: inherit; font-weight: 600; letter-spacing: 0.5px;
+    }
+    .admin-btn-primary { background: #00d4ff22; color: #00d4ff; border: 1px solid #00d4ff55; }
+    .admin-btn-primary:hover { background: #00d4ff33; }
+    .admin-btn-danger { background: #ff4d4d22; color: #ff4d4d; border: 1px solid #ff4d4d44; }
+    .admin-btn-danger:hover { background: #ff4d4d33; }
+    .admin-btn-success { background: #00ff8822; color: #00ff88; border: 1px solid #00ff8844; }
+    .admin-btn-success:hover { background: #00ff8833; }
+    .admin-close { position: absolute; top: 18px; right: 20px; background: none;
+      border: none; color: #888; font-size: 1.4rem; cursor: pointer; line-height: 1; }
+    .admin-close:hover { color: #ff4d4d; }
+    .admin-save-bar { display: flex; align-items: center; gap: 12px; padding-top: 16px;
+      border-top: 1px solid #ffffff11; }
+    .admin-save-msg { font-size: 0.8rem; color: #00ff88; opacity: 0; transition: opacity 0.3s; }
+    .admin-skill-row { background: #ffffff06; border-radius: 8px; padding: 10px 12px;
+      margin-bottom: 8px; border: 1px solid #ffffff0a; }
+    .admin-part-row { background: #ffffff06; border-radius: 8px; padding: 12px 14px;
+      margin-bottom: 10px; border: 1px solid #ffffff0a; }
+    .admin-part-row input { margin-bottom: 6px; width: 100%; box-sizing: border-box; }
+    .admin-tag { display: inline-block; background: #00d4ff11; color: #00d4ff88;
+      font-size: 0.7rem; border-radius: 4px; padding: 2px 8px; margin-right: 6px; }
+    #admin-pw-screen { text-align: center; }
+    #admin-pw-screen h2 { margin-bottom: 20px; }
+    #admin-pw-input { display: block; margin: 0 auto 14px; width: 220px; text-align: center;
+      font-size: 1.1rem; letter-spacing: 3px; }
+    #admin-pw-err { color: #ff4d4d; font-size: 0.82rem; min-height: 18px; margin-bottom: 8px; }
+  `;
+  document.head.appendChild(s);
+}
+
+// Build admin panel HTML
+function buildAdminPanel() {
+  const data = loadPortfolioData();
+
+  const skillRows = (data.skills_list || []).map((sk, i) => `
+    <div class="admin-skill-row" id="skill-row-${i}">
+      <div class="admin-row">
+        <label>Skill name</label>
+        <input type="text" id="sk-name-${i}" value="${sk.name}">
+        <input type="number" id="sk-lvl-${i}" value="${sk.level}" min="0" max="100" style="width:70px;flex:none">
+        <span class="admin-tag">%</span>
+      </div>
+      <div class="admin-row">
+        <label>Cert filename</label>
+        <input type="text" id="sk-cert-${i}" value="${sk.certFile}" placeholder="e.g. html-cert.jpg">
+        <input type="text" id="sk-status-${i}" value="${sk.status}" style="width:120px;flex:none">
+      </div>
+    </div>`).join('');
+
+  const partRows = (data.participations || []).map((p, i) => `
+    <div class="admin-part-row" id="part-row-${i}">
+      <div class="admin-row" style="margin-bottom:6px">
+        <label>Title</label>
+        <input type="text" id="pt-title-${i}" value="${p.title}">
+      </div>
+      <div class="admin-row" style="margin-bottom:6px">
+        <label>Detail</label>
+        <input type="text" id="pt-detail-${i}" value="${p.detail}">
+      </div>
+      <div class="admin-row" style="margin-bottom:6px">
+        <label>Cert file</label>
+        <input type="text" id="pt-cert-${i}" value="${p.certFile}" placeholder="e.g. hackathon1.jpeg">
+        <input type="text" id="pt-certtitle-${i}" value="${p.certTitle}" placeholder="Certificate title">
+      </div>
+      <div class="admin-row">
+        <label>Summary</label>
+        <textarea id="pt-summary-${i}" rows="2">${p.summary}</textarea>
+      </div>
+    </div>`).join('');
+
+  return `
+    <div id="admin-panel">
+      <button class="admin-close" onclick="closeAdmin()">×</button>
+      <h2>⚡ Portfolio Admin</h2>
+
+      <div class="admin-section">
+        <h3>Hero Stats</h3>
+        <div class="admin-row">
+          <label>CGPA</label>
+          <input type="text" id="adm-cgpa" value="${data.cgpa}" placeholder="9.58">
+        </div>
+        <div class="admin-row">
+          <label>Skills count</label>
+          <input type="number" id="adm-skills" value="${data.skills}" min="1" max="20">
+        </div>
+        <div class="admin-row">
+          <label>Year label</label>
+          <input type="text" id="adm-year" value="${data.yearLabel}" placeholder="3rd Year B.Tech">
+        </div>
+      </div>
+
+      <div class="admin-section">
+        <h3>Skills & Certificates</h3>
+        <p style="font-size:0.78rem;color:#666;margin:0 0 12px">Update skill levels (0–100) and certificate filenames. Files must be in the <code style="color:#00d4ff88">certs/</code> folder.</p>
+        ${skillRows}
+        <button class="admin-btn admin-btn-success" onclick="addSkillRow()" style="margin-top:6px">+ Add Skill</button>
+      </div>
+
+      <div class="admin-section">
+        <h3>Events & Participations</h3>
+        <p style="font-size:0.78rem;color:#666;margin:0 0 12px">Update event details and certificate filenames.</p>
+        ${partRows}
+        <button class="admin-btn admin-btn-success" onclick="addPartRow()" style="margin-top:6px">+ Add Event</button>
+      </div>
+
+      <div class="admin-section">
+        <h3>Quick Notes (private)</h3>
+        <textarea id="adm-notes" rows="3" style="width:100%;background:#0a0a14;border:1px solid #00d4ff22;border-radius:6px;color:#888;padding:8px 10px;font-size:0.82rem;box-sizing:border-box">${localStorage.getItem('portfolio_notes') || ''}</textarea>
+        <p style="font-size:0.72rem;color:#444;margin:4px 0 0">Private — never shown to visitors. Use for reminders about what to update.</p>
+      </div>
+
+      <div class="admin-save-bar">
+        <button class="admin-btn admin-btn-primary" onclick="saveAdmin()">💾 Save & Apply</button>
+        <button class="admin-btn admin-btn-danger" onclick="resetAdmin()">Reset to Defaults</button>
+        <span class="admin-save-msg" id="adm-save-msg">✓ Saved!</span>
+      </div>
+    </div>`;
+}
+
+// Save and apply changes live
+function saveAdmin() {
+  const data = loadPortfolioData();
+
+  data.cgpa = document.getElementById('adm-cgpa').value.trim();
+  data.skills = parseInt(document.getElementById('adm-skills').value) || 5;
+  data.yearLabel = document.getElementById('adm-year').value.trim();
+
+  // Skills
+  const skRows = document.querySelectorAll('[id^="skill-row-"]');
+  data.skills_list = Array.from(skRows).map((_, i) => ({
+    name: document.getElementById(`sk-name-${i}`)?.value || '',
+    level: parseInt(document.getElementById(`sk-lvl-${i}`)?.value) || 0,
+    certFile: document.getElementById(`sk-cert-${i}`)?.value || '',
+    status: document.getElementById(`sk-status-${i}`)?.value || ''
+  }));
+
+  // Participations
+  const ptRows = document.querySelectorAll('[id^="part-row-"]');
+  data.participations = Array.from(ptRows).map((_, i) => ({
+    icon: (data.participations[i] || {}).icon || 'fas fa-star',
+    title: document.getElementById(`pt-title-${i}`)?.value || '',
+    detail: document.getElementById(`pt-detail-${i}`)?.value || '',
+    certFile: document.getElementById(`pt-cert-${i}`)?.value || '',
+    certTitle: document.getElementById(`pt-certtitle-${i}`)?.value || '',
+    summary: document.getElementById(`pt-summary-${i}`)?.value || ''
+  }));
+
+  savePortfolioData(data);
+  localStorage.setItem('portfolio_notes', document.getElementById('adm-notes').value);
+
+  applyDataToPage(data);
+
+  const msg = document.getElementById('adm-save-msg');
+  msg.style.opacity = '1';
+  setTimeout(() => msg.style.opacity = '0', 2500);
+}
+
+// Apply saved data to the visible page
+function applyDataToPage(data) {
+  // Stats
+  document.querySelectorAll('.stat-num[data-count]').forEach(el => {
+    if (el.dataset.count && parseFloat(el.dataset.count) > 9) {
+      el.dataset.count = data.cgpa;
+      el.textContent = data.cgpa;
+    }
+  });
+  document.querySelectorAll('.stat').forEach(st => {
+    const lbl = st.querySelector('.stat-label');
+    const num = st.querySelector('.stat-num');
+    if (lbl && lbl.textContent === 'Skills' && num) {
+      num.dataset.count = data.skills;
+      num.textContent = data.skills + '+';
+    }
+    if (lbl && lbl.textContent === 'Year B.Tech' && num) {
+      num.textContent = data.yearLabel.replace(' B.Tech','');
+      lbl.textContent = 'Year B.Tech';
+    }
+  });
+
+  // Skill bars
+  const skillCards = document.querySelectorAll('.skill-card');
+  data.skills_list.forEach((sk, i) => {
+    const card = skillCards[i];
+    if (!card) return;
+    const nameEl = card.querySelector('.skill-name');
+    const fill = card.querySelector('.skill-fill');
+    const lbl = card.querySelector('.skill-cert-label');
+    if (nameEl) nameEl.textContent = sk.name;
+    if (fill) { fill.style.width = sk.level + '%'; fill.dataset.width = sk.level + '%'; }
+    if (lbl) lbl.textContent = sk.status;
+    card.onclick = () => openCert(sk.certFile, sk.name + ' Certificate');
+  });
+
+  // Info card CGPA
+  document.querySelectorAll('.info-val.accent').forEach(el => {
+    if (el.textContent.includes('9.') || el.textContent.includes('/')) {
+      el.textContent = data.cgpa + ' / 10.0';
+    }
+  });
+}
+
+function resetAdmin() {
+  if (confirm('Reset all portfolio data to original defaults?')) {
+    localStorage.removeItem('portfolio_data');
+    closeAdmin();
+    setTimeout(openAdmin, 200);
+  }
+}
+
+function addSkillRow() {
+  const data = loadPortfolioData();
+  data.skills_list.push({ name: 'New Skill', level: 70, certFile: 'new-cert.jpg', status: 'Certified' });
+  savePortfolioData(data);
+  closeAdmin();
+  setTimeout(openAdmin, 100);
+}
+
+function addPartRow() {
+  const data = loadPortfolioData();
+  data.participations.push({
+    icon: 'fas fa-star',
+    title: 'New Event',
+    detail: 'Describe this event',
+    summary: 'Detailed summary here.',
+    certFile: 'new-cert.jpeg',
+    certTitle: 'Event Certificate'
+  });
+  savePortfolioData(data);
+  closeAdmin();
+  setTimeout(openAdmin, 100);
+}
+
+let adminUnlocked = false;
+function openAdmin() {
+  injectAdminCSS();
+  const overlay = document.createElement('div');
+  overlay.id = 'admin-overlay';
+
+  if (!adminUnlocked) {
+    overlay.innerHTML = `
+      <div id="admin-panel">
+        <button class="admin-close" onclick="closeAdmin()">×</button>
+        <div id="admin-pw-screen">
+          <h2>⚡ Admin Access</h2>
+          <input class="admin-row input" id="admin-pw-input" type="password" placeholder="Enter password" autocomplete="off">
+          <div id="admin-pw-err"></div>
+          <button class="admin-btn admin-btn-primary" onclick="checkAdminPw()">Unlock</button>
+        </div>
+      </div>`;
+    document.body.appendChild(overlay);
+    document.getElementById('admin-pw-input').focus();
+    document.getElementById('admin-pw-input').addEventListener('keydown', e => {
+      if (e.key === 'Enter') checkAdminPw();
+    });
+  } else {
+    overlay.innerHTML = buildAdminPanel();
+    document.body.appendChild(overlay);
+  }
+}
+
+function checkAdminPw() {
+  const val = document.getElementById('admin-pw-input').value;
+  if (val === ADMIN_PASSWORD) {
+    adminUnlocked = true;
+    closeAdmin();
+    setTimeout(openAdmin, 100);
+  } else {
+    document.getElementById('admin-pw-err').textContent = 'Incorrect password.';
+    document.getElementById('admin-pw-input').value = '';
+    document.getElementById('admin-pw-input').focus();
+  }
+}
+
+function closeAdmin() {
+  const el = document.getElementById('admin-overlay');
+  if (el) el.remove();
+}
+
+// Keyboard shortcut: Ctrl + Shift + A
+document.addEventListener('keydown', e => {
+  if (e.ctrlKey && e.shiftKey && e.key === 'A') {
+    e.preventDefault();
+    if (document.getElementById('admin-overlay')) closeAdmin();
+    else openAdmin();
+  }
+});
+
+// URL param: ?admin=true
+if (new URLSearchParams(window.location.search).get('admin') === 'true') {
+  window.addEventListener('load', openAdmin);
+}
+
+// Auto-apply any saved data on page load
+window.addEventListener('load', () => {
+  const saved = localStorage.getItem('portfolio_data');
+  if (saved) {
+    try { applyDataToPage(JSON.parse(saved)); } catch(e) {}
+  }
+});
