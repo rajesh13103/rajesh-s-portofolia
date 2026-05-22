@@ -391,303 +391,389 @@ function injectAdminCSS() {
     }
     .admin-row input:focus, .admin-row textarea:focus { outline: none; border-color: #00d4ff88; }
     .admin-btn {
-      padding: 8px 18px; border-radius: 6px; border: none; cursor: pointer;
-      font-size: 0.82rem; font-family: inherit; font-weight: 600; letter-spacing: 0.5px;
-    }
-    .admin-btn-primary { background: #00d4ff22; color: #00d4ff; border: 1px solid #00d4ff55; }
-    .admin-btn-primary:hover { background: #00d4ff33; }
-    .admin-btn-danger { background: #ff4d4d22; color: #ff4d4d; border: 1px solid #ff4d4d44; }
-    .admin-btn-danger:hover { background: #ff4d4d33; }
-    .admin-btn-success { background: #00ff8822; color: #00ff88; border: 1px solid #00ff8844; }
-    .admin-btn-success:hover { background: #00ff8833; }
-    .admin-close { position: absolute; top: 18px; right: 20px; background: none;
-      border: none; color: #888; font-size: 1.4rem; cursor: pointer; line-height: 1; }
-    .admin-close:hover { color: #ff4d4d; }
-    .admin-save-bar { display: flex; align-items: center; gap: 12px; padding-top: 16px;
-      border-top: 1px solid #ffffff11; }
-    .admin-save-msg { font-size: 0.8rem; color: #00ff88; opacity: 0; transition: opacity 0.3s; }
-    .admin-skill-row { background: #ffffff06; border-radius: 8px; padding: 10px 12px;
-      margin-bottom: 8px; border: 1px solid #ffffff0a; }
-    .admin-part-row { background: #ffffff06; border-radius: 8px; padding: 12px 14px;
-      margin-bottom: 10px; border: 1px solid #ffffff0a; }
-    .admin-part-row input { margin-bottom: 6px; width: 100%; box-sizing: border-box; }
-    .admin-tag { display: inline-block; background: #00d4ff11; color: #00d4ff88;
-      font-size: 0.7rem; border-radius: 4px; padding: 2px 8px; margin-right: 6px; }
-    #admin-pw-screen { text-align: center; }
-    #admin-pw-screen h2 { margin-bottom: 20px; }
-    #admin-pw-input { display: block; margin: 0 auto 14px; width: 220px; text-align: center;
-      font-size: 1.1rem; letter-spacing: 3px; }
-    #admin-pw-err { color: #ff4d4d; font-size: 0.82rem; min-height: 18px; margin-bottom: 8px; }
-  `;
+
+// ===== HIDDEN ADMIN PANEL =====
+// Access: Ctrl+Shift+A  (invisible to viewers)
+// Password set below — change it!
+const ADMIN_PASSWORD = 'rajesh2026';
+
+// ---- Data helpers ----
+const DATA_KEY = 'rk_portfolio_v2';
+
+function defaultData() {
+  return {
+    cgpa: '9.58',
+    skillsCount: 5,
+    yearLabel: '3rd Year B.Tech',
+    education: [
+      { badge: '2024 – Present', degree: 'B.Tech — Electronics & Communication Engineering', school: 'Aditya College of Engineering, Madanapalle', detail: 'Currently Pursuing · 3rd Year', scoreLabel: 'CGPA', score: '9.58 / 10', scorePct: '95.8', certFile: 'btech-cert.jpeg', certTitle: 'B.Tech — Aditya College of Engineering' },
+      { badge: 'Completed', degree: 'Intermediate (10+2) — MPC', school: 'Sri Siddhartha Junior College, Madanapalle', detail: 'Board of Intermediate Education, AP', scoreLabel: 'Percentage', score: '90%', scorePct: '90', certFile: 'inter-cert.jpg.jpeg', certTitle: 'Intermediate — Sri Siddhartha Junior College' },
+      { badge: 'Completed', degree: 'Secondary School (SSC / Class X)', school: 'Vivekananda Municipal High School, Madanapalle', detail: 'Board of Secondary Education, AP', scoreLabel: 'Percentage', score: '84%', scorePct: '84', certFile: 'ssc-cert.jpg.jpeg', certTitle: 'SSC — Vivekananda Municipal High School' }
+    ],
+    skills: [
+      { name: 'HTML5', icon: 'fab fa-html5', iconColor: '#e44d26', level: 85, certFile: 'html-cert.jpg.jpeg', status: 'Certified' },
+      { name: 'CSS3', icon: 'fab fa-css3-alt', iconColor: '#264de4', level: 80, certFile: 'css-cert.jpeg', status: 'Certified' },
+      { name: 'JavaScript', icon: 'fab fa-js', iconColor: '#f7df1e', level: 70, certFile: 'js-cert.jpg', status: 'On Progress' },
+      { name: 'C Programming', icon: 'fas fa-memory', iconColor: '#a9c0d4', level: 75, certFile: 'c-cert.jpg.jpeg', status: 'On Progress' },
+      { name: 'Python', icon: 'fab fa-python', iconColor: '#3776ab', level: 72, certFile: 'python-cert.jpg.jpeg', status: 'Certified' }
+    ],
+    participations: [
+      { icon: 'fas fa-trophy', title: 'Hackathons & Competitions', detail: 'Participated in National-level Department Fest held at MITS deemed to be University', summary: 'Participated in inter-college hackathon events where teams collaborated to solve real-world problems within time constraints.', certFile: 'hackathon1.jpeg', certTitle: 'Hackathon Certificate' },
+      { icon: 'fas fa-laptop-code', title: 'Workshops & Seminars', detail: 'Participated in Mini Project Expo held at Aditya College of Engineering and Organised by Dept of AI&DS', summary: 'Attended hands-on workshops covering web development technologies.', certFile: 'workshop-cert.jpeg', certTitle: 'Workshop Certificate' },
+      { icon: 'fas fa-university', title: 'Academic Activities', detail: 'Active participant in departmental events at Aditya College', summary: 'Actively participated in various departmental and college-level academic events.', certFile: 'academic-cert.jpeg', certTitle: 'Academic Certificate' },
+      { icon: 'fas fa-medal', title: 'Online Certifications', detail: 'Completed professional online courses and certifications', summary: 'Completed various online courses through platforms like Simplilearn, NPTEL.', certFile: 'extra-cert.jpeg', certTitle: 'Online Certification' }
+    ]
+  };
+}
+
+function loadData() {
+  try { const s = localStorage.getItem(DATA_KEY); return s ? Object.assign(defaultData(), JSON.parse(s)) : defaultData(); }
+  catch(e) { return defaultData(); }
+}
+function saveData(d) { localStorage.setItem(DATA_KEY, JSON.stringify(d)); }
+
+// ---- Apply data to live page ----
+function applyData(d) {
+  // Hero stats
+  document.querySelectorAll('.stat').forEach(st => {
+    const lbl = st.querySelector('.stat-label');
+    const num = st.querySelector('.stat-num');
+    if (!lbl || !num) return;
+    if (lbl.textContent.trim() === 'CGPA') { num.textContent = d.cgpa; num.dataset.count = d.cgpa; }
+    if (lbl.textContent.trim() === 'Skills') { num.textContent = d.skillsCount + '+'; num.dataset.count = d.skillsCount; }
+    if (lbl.textContent.includes('Year')) { num.textContent = d.yearLabel.split(' ')[0]; }
+  });
+
+  // About info card CGPA
+  document.querySelectorAll('.info-val.accent').forEach(el => {
+    if (el.textContent.includes('/')) el.textContent = d.cgpa + ' / 10.0';
+  });
+
+  // Education timeline cards
+  const cards = document.querySelectorAll('.timeline-card');
+  d.education.forEach((edu, i) => {
+    const card = cards[i];
+    if (!card) return;
+    const badge = card.querySelector('.timeline-badge');
+    const deg = card.querySelector('.timeline-degree');
+    const school = card.querySelector('.timeline-school');
+    const detail = card.querySelector('.timeline-detail');
+    const scoreLabel = card.querySelector('.score-label');
+    const fill = card.querySelector('.score-fill');
+    if (badge) badge.textContent = edu.badge;
+    if (deg) deg.textContent = edu.degree;
+    if (school) school.innerHTML = `<i class="fas fa-university"></i> ${edu.school}`;
+    if (detail) detail.textContent = edu.detail;
+    if (scoreLabel) scoreLabel.innerHTML = `${edu.scoreLabel}: <span class="accent">${edu.score}</span>`;
+    if (fill) { fill.style.width = edu.scorePct + '%'; fill.dataset.width = edu.scorePct + '%'; }
+    card.onclick = () => openCert(edu.certFile, edu.certTitle);
+  });
+
+  // Skills
+  const skillCards = document.querySelectorAll('.skill-card');
+  d.skills.forEach((sk, i) => {
+    const card = skillCards[i];
+    if (!card) return;
+    const nm = card.querySelector('.skill-name');
+    const fill = card.querySelector('.skill-fill');
+    const lbl = card.querySelector('.skill-cert-label');
+    if (nm) nm.textContent = sk.name;
+    if (fill) { fill.style.width = sk.level + '%'; fill.dataset.width = sk.level + '%'; }
+    if (lbl) lbl.innerHTML = `<i class="fas fa-award"></i> ${sk.status}`;
+    card.onclick = () => openCert(sk.certFile, sk.name + ' Certificate');
+  });
+
+  // Participations
+  const partCards = document.querySelectorAll('.part-card');
+  d.participations.forEach((p, i) => {
+    const card = partCards[i];
+    if (!card) return;
+    const title = card.querySelector('.part-title');
+    const detail = card.querySelector('.part-detail');
+    const summaryEl = card.querySelector('.part-summary p');
+    if (title) title.textContent = p.title;
+    if (detail) detail.textContent = p.detail;
+    if (summaryEl) summaryEl.textContent = p.summary;
+    const certBtn = card.querySelector('.cert-btn');
+    if (certBtn) certBtn.onclick = () => openCert(p.certFile, p.certTitle);
+  });
+}
+
+// ---- Generate updated index.html with data baked in ----
+function generateHTML(d) {
+  // Get current page HTML
+  const html = document.documentElement.outerHTML;
+
+  // Build the data-inject script block
+  const dataScript = `\n<script id="portfolio-data-inject">\n(function(){\n  const d = ${JSON.stringify(d, null, 2)};\n  window.__PORTFOLIO_DATA__ = d;\n})();\n<\/script>`;
+
+  // Remove old inject block if present, insert before </head>
+  const cleaned = html.replace(/<script id="portfolio-data-inject">[\s\S]*?<\/script>/g, '');
+  return cleaned.replace('</head>', dataScript + '\n</head>');
+}
+
+function downloadHTML(d) {
+  const blob = new Blob([generateHTML(d)], { type: 'text/html' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'index.html';
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+// ---- CSS ----
+function injectAdminCSS() {
+  if (document.getElementById('adm-css')) return;
+  const s = document.createElement('style');
+  s.id = 'adm-css';
+  s.textContent = `
+#adm-overlay{position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:99999;display:flex;align-items:center;justify-content:center;font-family:'Exo 2',sans-serif}
+#adm-panel{background:#0b0b1a;border:1px solid #00d4ff33;border-radius:14px;width:min(94vw,660px);max-height:90vh;overflow-y:auto;padding:28px 30px;color:#cdd6f4;position:relative}
+#adm-panel h2{color:#00d4ff;font-size:1.15rem;margin:0 0 6px;font-family:'Orbitron',sans-serif;letter-spacing:2px}
+.adm-hint{font-size:.75rem;color:#444;margin:0 0 18px}
+.adm-sec{margin-bottom:22px;border-top:1px solid #ffffff0f;padding-top:16px}
+.adm-sec h3{color:#00ff88;font-size:.75rem;letter-spacing:1.5px;text-transform:uppercase;margin:0 0 12px}
+.adm-row{display:flex;gap:8px;align-items:center;margin-bottom:9px;flex-wrap:wrap}
+.adm-row label{font-size:.78rem;color:#777;min-width:110px}
+.adm-row input,.adm-row textarea,.adm-row select{flex:1;background:#09091a;border:1px solid #00d4ff22;border-radius:6px;color:#cdd6f4;padding:6px 9px;font-size:.83rem;font-family:inherit;min-width:0}
+.adm-row input:focus,.adm-row textarea:focus{outline:none;border-color:#00d4ff66}
+.adm-item{background:#ffffff05;border-radius:8px;padding:12px 14px;margin-bottom:10px;border:1px solid #ffffff08}
+.adm-item-title{font-size:.75rem;color:#00d4ff88;margin-bottom:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase}
+.adm-btn{padding:7px 16px;border-radius:6px;border:none;cursor:pointer;font-size:.8rem;font-family:inherit;font-weight:600}
+.adm-btn-blue{background:#00d4ff18;color:#00d4ff;border:1px solid #00d4ff44}
+.adm-btn-blue:hover{background:#00d4ff28}
+.adm-btn-green{background:#00ff8818;color:#00ff88;border:1px solid #00ff8844}
+.adm-btn-green:hover{background:#00ff8828}
+.adm-btn-red{background:#ff4d4d18;color:#ff4d4d;border:1px solid #ff4d4d44}
+.adm-btn-red:hover{background:#ff4d4d28}
+.adm-btn-gold{background:#ffcc0018;color:#ffcc00;border:1px solid #ffcc0044;font-size:.85rem;padding:9px 20px}
+.adm-btn-gold:hover{background:#ffcc0028}
+.adm-close{position:absolute;top:16px;right:18px;background:none;border:none;color:#666;font-size:1.4rem;cursor:pointer;line-height:1}
+.adm-close:hover{color:#ff4d4d}
+.adm-bar{display:flex;align-items:center;gap:10px;padding-top:16px;border-top:1px solid #ffffff0f;flex-wrap:wrap}
+.adm-saved{font-size:.78rem;color:#00ff88;opacity:0;transition:opacity .3s}
+#adm-pw-screen{text-align:center;padding:10px 0}
+#adm-pw-screen h2{margin-bottom:18px}
+#adm-pw-in{display:block;margin:0 auto 12px;width:200px;text-align:center;font-size:1rem;letter-spacing:3px;background:#09091a;border:1px solid #00d4ff33;border-radius:8px;color:#cdd6f4;padding:8px}
+#adm-pw-err{color:#ff4d4d;font-size:.8rem;min-height:18px;margin-bottom:8px}
+`;
   document.head.appendChild(s);
 }
 
-// Build admin panel HTML
-function buildAdminPanel() {
-  const data = loadPortfolioData();
+// ---- Panel HTML builder ----
+function buildPanel() {
+  const d = loadData();
 
-  const skillRows = (data.skills_list || []).map((sk, i) => `
-    <div class="admin-skill-row" id="skill-row-${i}">
-      <div class="admin-row">
-        <label>Skill name</label>
-        <input type="text" id="sk-name-${i}" value="${sk.name}">
-        <input type="number" id="sk-lvl-${i}" value="${sk.level}" min="0" max="100" style="width:70px;flex:none">
-        <span class="admin-tag">%</span>
+  const eduRows = d.education.map((e, i) => `
+    <div class="adm-item">
+      <div class="adm-item-title">Education ${i+1}</div>
+      <div class="adm-row"><label>Year/Badge</label><input id="ed-badge-${i}" value="${e.badge}"></div>
+      <div class="adm-row"><label>Degree</label><input id="ed-deg-${i}" value="${e.degree}"></div>
+      <div class="adm-row"><label>School</label><input id="ed-school-${i}" value="${e.school}"></div>
+      <div class="adm-row"><label>Detail line</label><input id="ed-det-${i}" value="${e.detail}"></div>
+      <div class="adm-row">
+        <label>Score label</label><input id="ed-slbl-${i}" value="${e.scoreLabel}" style="max-width:100px">
+        <input id="ed-score-${i}" value="${e.score}" placeholder="9.58 / 10" style="max-width:110px">
+        <input id="ed-pct-${i}" value="${e.scorePct}" placeholder="95.8" style="max-width:70px" title="Bar %">
       </div>
-      <div class="admin-row">
-        <label>Cert filename</label>
-        <input type="text" id="sk-cert-${i}" value="${sk.certFile}" placeholder="e.g. html-cert.jpg">
-        <input type="text" id="sk-status-${i}" value="${sk.status}" style="width:120px;flex:none">
+      <div class="adm-row"><label>Cert filename</label><input id="ed-cert-${i}" value="${e.certFile}" placeholder="btech-cert.jpeg"></div>
+    </div>`).join('');
+
+  const skRows = d.skills.map((sk, i) => `
+    <div class="adm-item">
+      <div class="adm-item-title">Skill ${i+1}</div>
+      <div class="adm-row">
+        <label>Name</label><input id="sk-name-${i}" value="${sk.name}">
+        <input id="sk-lvl-${i}" type="number" value="${sk.level}" min="0" max="100" style="width:64px;flex:none" title="Level %">
+        <span style="font-size:.75rem;color:#666">%</span>
+      </div>
+      <div class="adm-row">
+        <label>Cert file</label><input id="sk-cert-${i}" value="${sk.certFile}">
+        <input id="sk-status-${i}" value="${sk.status}" style="width:110px;flex:none" title="Status text">
       </div>
     </div>`).join('');
 
-  const partRows = (data.participations || []).map((p, i) => `
-    <div class="admin-part-row" id="part-row-${i}">
-      <div class="admin-row" style="margin-bottom:6px">
-        <label>Title</label>
-        <input type="text" id="pt-title-${i}" value="${p.title}">
-      </div>
-      <div class="admin-row" style="margin-bottom:6px">
-        <label>Detail</label>
-        <input type="text" id="pt-detail-${i}" value="${p.detail}">
-      </div>
-      <div class="admin-row" style="margin-bottom:6px">
-        <label>Cert file</label>
-        <input type="text" id="pt-cert-${i}" value="${p.certFile}" placeholder="e.g. hackathon1.jpeg">
-        <input type="text" id="pt-certtitle-${i}" value="${p.certTitle}" placeholder="Certificate title">
-      </div>
-      <div class="admin-row">
-        <label>Summary</label>
-        <textarea id="pt-summary-${i}" rows="2">${p.summary}</textarea>
+  const ptRows = d.participations.map((p, i) => `
+    <div class="adm-item">
+      <div class="adm-item-title">Event ${i+1}</div>
+      <div class="adm-row"><label>Title</label><input id="pt-title-${i}" value="${p.title}"></div>
+      <div class="adm-row"><label>Detail</label><input id="pt-det-${i}" value="${p.detail}"></div>
+      <div class="adm-row"><label>Summary</label><textarea id="pt-sum-${i}" rows="2">${p.summary}</textarea></div>
+      <div class="adm-row">
+        <label>Cert file</label><input id="pt-cert-${i}" value="${p.certFile}">
+        <input id="pt-ctitle-${i}" value="${p.certTitle}" placeholder="Certificate title">
       </div>
     </div>`).join('');
 
-  return `
-    <div id="admin-panel">
-      <button class="admin-close" onclick="closeAdmin()">×</button>
-      <h2>⚡ Portfolio Admin</h2>
+  return `<div id="adm-panel">
+    <button class="adm-close" onclick="closeAdmin()">×</button>
+    <h2>⚡ Portfolio Admin</h2>
+    <p class="adm-hint">Ctrl+Shift+A to toggle · Changes are permanent after Download</p>
 
-      <div class="admin-section">
-        <h3>Hero Stats</h3>
-        <div class="admin-row">
-          <label>CGPA</label>
-          <input type="text" id="adm-cgpa" value="${data.cgpa}" placeholder="9.58">
-        </div>
-        <div class="admin-row">
-          <label>Skills count</label>
-          <input type="number" id="adm-skills" value="${data.skills}" min="1" max="20">
-        </div>
-        <div class="admin-row">
-          <label>Year label</label>
-          <input type="text" id="adm-year" value="${data.yearLabel}" placeholder="3rd Year B.Tech">
-        </div>
-      </div>
+    <div class="adm-sec">
+      <h3>Hero Stats</h3>
+      <div class="adm-row"><label>CGPA</label><input id="adm-cgpa" value="${d.cgpa}"></div>
+      <div class="adm-row"><label>Skills count</label><input id="adm-skillscount" type="number" value="${d.skillsCount}" min="1" max="30"></div>
+      <div class="adm-row"><label>Year label</label><input id="adm-year" value="${d.yearLabel}" placeholder="3rd Year B.Tech"></div>
+    </div>
 
-      <div class="admin-section">
-        <h3>Skills & Certificates</h3>
-        <p style="font-size:0.78rem;color:#666;margin:0 0 12px">Update skill levels (0–100) and certificate filenames. Files must be in the <code style="color:#00d4ff88">certs/</code> folder.</p>
-        ${skillRows}
-        <button class="admin-btn admin-btn-success" onclick="addSkillRow()" style="margin-top:6px">+ Add Skill</button>
-      </div>
+    <div class="adm-sec">
+      <h3>Education</h3>
+      ${eduRows}
+      <button class="adm-btn adm-btn-green" onclick="addEdu()" style="margin-top:4px">+ Add Education</button>
+    </div>
 
-      <div class="admin-section">
-        <h3>Events & Participations</h3>
-        <p style="font-size:0.78rem;color:#666;margin:0 0 12px">Update event details and certificate filenames.</p>
-        ${partRows}
-        <button class="admin-btn admin-btn-success" onclick="addPartRow()" style="margin-top:6px">+ Add Event</button>
-      </div>
+    <div class="adm-sec">
+      <h3>Skills & Certificates</h3>
+      <div id="adm-skills-wrap">${skRows}</div>
+      <button class="adm-btn adm-btn-green" onclick="addSkill()" style="margin-top:4px">+ Add Skill</button>
+    </div>
 
-      <div class="admin-section">
-        <h3>Quick Notes (private)</h3>
-        <textarea id="adm-notes" rows="3" style="width:100%;background:#0a0a14;border:1px solid #00d4ff22;border-radius:6px;color:#888;padding:8px 10px;font-size:0.82rem;box-sizing:border-box">${localStorage.getItem('portfolio_notes') || ''}</textarea>
-        <p style="font-size:0.72rem;color:#444;margin:4px 0 0">Private — never shown to visitors. Use for reminders about what to update.</p>
-      </div>
+    <div class="adm-sec">
+      <h3>Events & Participations</h3>
+      <div id="adm-parts-wrap">${ptRows}</div>
+      <button class="adm-btn adm-btn-green" onclick="addPart()" style="margin-top:4px">+ Add Event</button>
+    </div>
 
-      <div class="admin-save-bar">
-        <button class="admin-btn admin-btn-primary" onclick="saveAdmin()">💾 Save & Apply</button>
-        <button class="admin-btn admin-btn-danger" onclick="resetAdmin()">Reset to Defaults</button>
-        <span class="admin-save-msg" id="adm-save-msg">✓ Saved!</span>
-      </div>
-    </div>`;
+    <div class="adm-bar">
+      <button class="adm-btn adm-btn-gold" onclick="saveAndDownload()">💾 Save & Download index.html</button>
+      <button class="adm-btn adm-btn-blue" onclick="previewAdmin()">👁 Preview only</button>
+      <button class="adm-btn adm-btn-red" onclick="resetAdmin()">Reset</button>
+      <span class="adm-saved" id="adm-saved-msg"></span>
+    </div>
+    <p style="font-size:.72rem;color:#333;margin-top:10px">
+      After downloading: replace your old <code style="color:#00d4ff55">index.html</code> with the downloaded file. Changes are then permanent.
+    </p>
+  </div>`;
 }
 
-// Save and apply changes live
-function saveAdmin() {
-  const data = loadPortfolioData();
+// ---- Collect form data ----
+function collectFormData() {
+  const d = loadData();
+  d.cgpa = document.getElementById('adm-cgpa').value.trim();
+  d.skillsCount = parseInt(document.getElementById('adm-skillscount').value) || 5;
+  d.yearLabel = document.getElementById('adm-year').value.trim();
 
-  data.cgpa = document.getElementById('adm-cgpa').value.trim();
-  data.skills = parseInt(document.getElementById('adm-skills').value) || 5;
-  data.yearLabel = document.getElementById('adm-year').value.trim();
+  d.education = d.education.map((_, i) => ({
+    badge:      document.getElementById(`ed-badge-${i}`)?.value || '',
+    degree:     document.getElementById(`ed-deg-${i}`)?.value || '',
+    school:     document.getElementById(`ed-school-${i}`)?.value || '',
+    detail:     document.getElementById(`ed-det-${i}`)?.value || '',
+    scoreLabel: document.getElementById(`ed-slbl-${i}`)?.value || 'Score',
+    score:      document.getElementById(`ed-score-${i}`)?.value || '',
+    scorePct:   document.getElementById(`ed-pct-${i}`)?.value || '0',
+    certFile:   document.getElementById(`ed-cert-${i}`)?.value || '',
+    certTitle:  document.getElementById(`ed-badge-${i}`)?.value || ''
+  }));
 
-  // Skills
-  const skRows = document.querySelectorAll('[id^="skill-row-"]');
-  data.skills_list = Array.from(skRows).map((_, i) => ({
-    name: document.getElementById(`sk-name-${i}`)?.value || '',
-    level: parseInt(document.getElementById(`sk-lvl-${i}`)?.value) || 0,
+  d.skills = d.skills.map((_, i) => ({
+    name:     document.getElementById(`sk-name-${i}`)?.value || '',
+    icon:     (d.skills[i]||{}).icon || 'fas fa-code',
+    iconColor:(d.skills[i]||{}).iconColor || '#00d4ff',
+    level:    parseInt(document.getElementById(`sk-lvl-${i}`)?.value) || 0,
     certFile: document.getElementById(`sk-cert-${i}`)?.value || '',
-    status: document.getElementById(`sk-status-${i}`)?.value || ''
+    status:   document.getElementById(`sk-status-${i}`)?.value || ''
   }));
 
-  // Participations
-  const ptRows = document.querySelectorAll('[id^="part-row-"]');
-  data.participations = Array.from(ptRows).map((_, i) => ({
-    icon: (data.participations[i] || {}).icon || 'fas fa-star',
-    title: document.getElementById(`pt-title-${i}`)?.value || '',
-    detail: document.getElementById(`pt-detail-${i}`)?.value || '',
-    certFile: document.getElementById(`pt-cert-${i}`)?.value || '',
-    certTitle: document.getElementById(`pt-certtitle-${i}`)?.value || '',
-    summary: document.getElementById(`pt-summary-${i}`)?.value || ''
+  d.participations = d.participations.map((p, i) => ({
+    icon:      p.icon || 'fas fa-star',
+    title:     document.getElementById(`pt-title-${i}`)?.value || '',
+    detail:    document.getElementById(`pt-det-${i}`)?.value || '',
+    summary:   document.getElementById(`pt-sum-${i}`)?.value || '',
+    certFile:  document.getElementById(`pt-cert-${i}`)?.value || '',
+    certTitle: document.getElementById(`pt-ctitle-${i}`)?.value || ''
   }));
 
-  savePortfolioData(data);
-  localStorage.setItem('portfolio_notes', document.getElementById('adm-notes').value);
+  return d;
+}
 
-  applyDataToPage(data);
-
-  const msg = document.getElementById('adm-save-msg');
+function previewAdmin() {
+  const d = collectFormData();
+  saveData(d);
+  applyData(d);
+  const msg = document.getElementById('adm-saved-msg');
+  msg.textContent = '✓ Previewing on page!';
   msg.style.opacity = '1';
   setTimeout(() => msg.style.opacity = '0', 2500);
 }
 
-// Apply saved data to the visible page
-function applyDataToPage(data) {
-  // Stats
-  document.querySelectorAll('.stat-num[data-count]').forEach(el => {
-    if (el.dataset.count && parseFloat(el.dataset.count) > 9) {
-      el.dataset.count = data.cgpa;
-      el.textContent = data.cgpa;
-    }
-  });
-  document.querySelectorAll('.stat').forEach(st => {
-    const lbl = st.querySelector('.stat-label');
-    const num = st.querySelector('.stat-num');
-    if (lbl && lbl.textContent === 'Skills' && num) {
-      num.dataset.count = data.skills;
-      num.textContent = data.skills + '+';
-    }
-    if (lbl && lbl.textContent === 'Year B.Tech' && num) {
-      num.textContent = data.yearLabel.replace(' B.Tech','');
-      lbl.textContent = 'Year B.Tech';
-    }
-  });
-
-  // Skill bars
-  const skillCards = document.querySelectorAll('.skill-card');
-  data.skills_list.forEach((sk, i) => {
-    const card = skillCards[i];
-    if (!card) return;
-    const nameEl = card.querySelector('.skill-name');
-    const fill = card.querySelector('.skill-fill');
-    const lbl = card.querySelector('.skill-cert-label');
-    if (nameEl) nameEl.textContent = sk.name;
-    if (fill) { fill.style.width = sk.level + '%'; fill.dataset.width = sk.level + '%'; }
-    if (lbl) lbl.textContent = sk.status;
-    card.onclick = () => openCert(sk.certFile, sk.name + ' Certificate');
-  });
-
-  // Info card CGPA
-  document.querySelectorAll('.info-val.accent').forEach(el => {
-    if (el.textContent.includes('9.') || el.textContent.includes('/')) {
-      el.textContent = data.cgpa + ' / 10.0';
-    }
-  });
+function saveAndDownload() {
+  const d = collectFormData();
+  saveData(d);
+  applyData(d);
+  downloadHTML(d);
+  const msg = document.getElementById('adm-saved-msg');
+  msg.textContent = '✓ Downloaded! Replace your index.html.';
+  msg.style.opacity = '1';
+  setTimeout(() => msg.style.opacity = '0', 4000);
 }
 
 function resetAdmin() {
-  if (confirm('Reset all portfolio data to original defaults?')) {
-    localStorage.removeItem('portfolio_data');
-    closeAdmin();
-    setTimeout(openAdmin, 200);
-  }
-}
-
-function addSkillRow() {
-  const data = loadPortfolioData();
-  data.skills_list.push({ name: 'New Skill', level: 70, certFile: 'new-cert.jpg', status: 'Certified' });
-  savePortfolioData(data);
+  if (!confirm('Reset all changes to original defaults?')) return;
+  localStorage.removeItem(DATA_KEY);
   closeAdmin();
-  setTimeout(openAdmin, 100);
+  setTimeout(openAdmin, 150);
 }
 
-function addPartRow() {
-  const data = loadPortfolioData();
-  data.participations.push({
-    icon: 'fas fa-star',
-    title: 'New Event',
-    detail: 'Describe this event',
-    summary: 'Detailed summary here.',
-    certFile: 'new-cert.jpeg',
-    certTitle: 'Event Certificate'
-  });
-  savePortfolioData(data);
-  closeAdmin();
-  setTimeout(openAdmin, 100);
+function addEdu() {
+  const d = collectFormData();
+  d.education.push({ badge: 'Completed', degree: 'New Qualification', school: 'School / College Name', detail: 'Board / University', scoreLabel: 'Percentage', score: '0%', scorePct: '0', certFile: 'cert.jpg', certTitle: 'Certificate' });
+  saveData(d);
+  closeAdmin(); setTimeout(openAdmin, 100);
+}
+function addSkill() {
+  const d = collectFormData();
+  d.skills.push({ name: 'New Skill', icon: 'fas fa-code', iconColor: '#00d4ff', level: 70, certFile: 'cert.jpg', status: 'Certified' });
+  saveData(d);
+  closeAdmin(); setTimeout(openAdmin, 100);
+}
+function addPart() {
+  const d = collectFormData();
+  d.participations.push({ icon: 'fas fa-star', title: 'New Event', detail: 'Event details', summary: 'Summary of participation.', certFile: 'cert.jpeg', certTitle: 'Event Certificate' });
+  saveData(d);
+  closeAdmin(); setTimeout(openAdmin, 100);
 }
 
-let adminUnlocked = false;
+// ---- Open / close ----
+let _adminUnlocked = false;
 function openAdmin() {
   injectAdminCSS();
-  const overlay = document.createElement('div');
-  overlay.id = 'admin-overlay';
-
-  if (!adminUnlocked) {
-    overlay.innerHTML = `
-      <div id="admin-panel">
-        <button class="admin-close" onclick="closeAdmin()">×</button>
-        <div id="admin-pw-screen">
-          <h2>⚡ Admin Access</h2>
-          <input class="admin-row input" id="admin-pw-input" type="password" placeholder="Enter password" autocomplete="off">
-          <div id="admin-pw-err"></div>
-          <button class="admin-btn admin-btn-primary" onclick="checkAdminPw()">Unlock</button>
-        </div>
-      </div>`;
-    document.body.appendChild(overlay);
-    document.getElementById('admin-pw-input').focus();
-    document.getElementById('admin-pw-input').addEventListener('keydown', e => {
-      if (e.key === 'Enter') checkAdminPw();
-    });
+  const ov = document.createElement('div');
+  ov.id = 'adm-overlay';
+  if (!_adminUnlocked) {
+    ov.innerHTML = `<div id="adm-panel"><button class="adm-close" onclick="closeAdmin()">×</button>
+      <div id="adm-pw-screen">
+        <h2>⚡ Admin Access</h2>
+        <input id="adm-pw-in" type="password" placeholder="Password" autocomplete="off">
+        <div id="adm-pw-err"></div>
+        <button class="adm-btn adm-btn-blue" onclick="checkPw()">Unlock</button>
+      </div></div>`;
+    document.body.appendChild(ov);
+    const inp = document.getElementById('adm-pw-in');
+    inp.focus();
+    inp.addEventListener('keydown', e => { if(e.key==='Enter') checkPw(); });
   } else {
-    overlay.innerHTML = buildAdminPanel();
-    document.body.appendChild(overlay);
+    ov.innerHTML = buildPanel();
+    document.body.appendChild(ov);
   }
 }
-
-function checkAdminPw() {
-  const val = document.getElementById('admin-pw-input').value;
-  if (val === ADMIN_PASSWORD) {
-    adminUnlocked = true;
-    closeAdmin();
-    setTimeout(openAdmin, 100);
-  } else {
-    document.getElementById('admin-pw-err').textContent = 'Incorrect password.';
-    document.getElementById('admin-pw-input').value = '';
-    document.getElementById('admin-pw-input').focus();
-  }
+function checkPw() {
+  const v = document.getElementById('adm-pw-in').value;
+  if (v === ADMIN_PASSWORD) { _adminUnlocked = true; closeAdmin(); setTimeout(openAdmin,100); }
+  else { document.getElementById('adm-pw-err').textContent='Wrong password'; document.getElementById('adm-pw-in').value=''; }
 }
+function closeAdmin() { const el=document.getElementById('adm-overlay'); if(el) el.remove(); }
 
-function closeAdmin() {
-  const el = document.getElementById('admin-overlay');
-  if (el) el.remove();
-}
-
-// Keyboard shortcut: Ctrl + Shift + A
+// Keyboard shortcut
 document.addEventListener('keydown', e => {
-  if (e.ctrlKey && e.shiftKey && e.key === 'A') {
+  if (e.ctrlKey && e.shiftKey && e.key==='A') {
     e.preventDefault();
-    if (document.getElementById('admin-overlay')) closeAdmin();
-    else openAdmin();
+    document.getElementById('adm-overlay') ? closeAdmin() : openAdmin();
   }
 });
 
-// URL param: ?admin=true
-if (new URLSearchParams(window.location.search).get('admin') === 'true') {
-  window.addEventListener('load', openAdmin);
-}
-
-// Auto-apply any saved data on page load
+// Auto-apply saved data on load
 window.addEventListener('load', () => {
-  const saved = localStorage.getItem('portfolio_data');
-  if (saved) {
-    try { applyDataToPage(JSON.parse(saved)); } catch(e) {}
-  }
+  const saved = localStorage.getItem(DATA_KEY);
+  if (saved) { try { applyData(JSON.parse(saved)); } catch(e){} }
 });
