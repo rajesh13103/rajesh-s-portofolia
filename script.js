@@ -1,4 +1,4 @@
-// === ANIMATED BACKGROUND =====
+// ===== ANIMATED BACKGROUND =====
 const canvas = document.getElementById('bg-canvas');
 const ctx = canvas.getContext('2d');
 let W, H, particles = [], matrixCols = [], animId;
