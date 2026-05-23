@@ -56,14 +56,14 @@ document.getElementById('contact-form').addEventListener('submit',function(e){ e
 document.querySelectorAll('a[href^="#"]').forEach(a=>{ a.addEventListener('click',e=>{ const t=document.querySelector(a.getAttribute('href')); if(t){e.preventDefault();t.scrollIntoView({behavior:'smooth',block:'start'});} }); });
 
 // ===== DEFAULT DATA =====
-const ADMIN_PASSWORD = 'rajesh2026';
+const ADMIN_PASSWORD = 'rajesh13103';
 
 function getDefaultData() {
   return {
     // Hero
     heroName: 'RAJESH KUMAR BOMALLEENI',
     heroDesc: 'Building efficient software solutions at the intersection of electronics engineering and web development. Passionate about turning ideas into clean, functional code.',
-    cgpa: '9.58',
+    cgpa: '9.52',
     skills: 5,
     yearLabel: '3rd Year B.Tech',
     resumeFile: 'resume.pdf.docx',
@@ -74,7 +74,7 @@ function getDefaultData() {
     // Personal Info card
     infoName: 'Rajesh Kumar Bomalleeni',
     infoDegree: 'B.Tech ECE (3rd Year)',
-    infoCGPA: '9.58 / 10.0',
+    infoCGPA: '9.52 / 10.0',
     infoCollege: 'Aditya College of Engineering',
     infoLocation: 'Madanapalle, AP',
     infoPhone: '+91 9391134330',
